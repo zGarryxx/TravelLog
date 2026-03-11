@@ -1,0 +1,212 @@
+[
+  {
+    "nombre": "Torre Eiffel",
+    "ciudad": "París",
+    "tipo": "Monumento",
+    "descripcion": "El icono de hierro más famoso del mundo, construido para la Exposición Universal de 1889.",
+    "imagen": "https://content-viajes.nationalgeographic.com.es/medio/2024/02/14/torre-eiffel_6e9796fd_278483323_240214093442_1280x853.jpg"
+  },
+  {
+    "nombre": "Estatua de la Libertad",
+    "ciudad": "Nueva York",
+    "tipo": "Monumento",
+    "descripcion": "Símbolo universal de la libertad, situada en la isla de la Libertad en el puerto de Nueva York.",
+    "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Statue_of_Liberty_7.jpg/1280px-Statue_of_Liberty_7.jpg"
+  },
+  {
+    "nombre": "Coliseo Romano",
+    "ciudad": "Roma",
+    "tipo": "Histórico",
+    "descripcion": "El mayor anfiteatro del Imperio Romano, testigo de luchas de gladiadores y espectáculos públicos.",
+    "imagen": "https://content-viajes.nationalgeographic.com.es/medio/2024/09/19/coliseo_9b206d89_240919151753_1280x853.jpg"
+  },
+  {
+    "nombre": "Machu Picchu",
+    "ciudad": "Cuzco",
+    "tipo": "Histórico",
+    "descripcion": "La ciudad perdida de los Incas, una obra maestra de ingeniería y arquitectura en los Andes.",
+    "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Machu_Picchu%2C_Peru.jpg/1280px-Machu_Picchu%2C_Peru.jpg"
+  },
+  {
+    "nombre": "Taj Mahal",
+    "ciudad": "Agra",
+    "tipo": "Monumento",
+    "descripcion": "Mausoleo de mármol blanco construido por el emperador Shah Jahan en memoria de su esposa.",
+    "imagen": "https://www.hola.com/horizon/original_aspect_ratio/98a0421b3aa8-taj-mahal-india-jardines-a.jpg?im=Resize=(640),type=downsize"
+  },
+  {
+    "nombre": "Ópera de Sídney",
+    "ciudad": "Sídney",
+    "tipo": "Arquitectura",
+    "descripcion": "Edificio icónico del siglo XX conocido por su diseño de techos en forma de concha o velas.",
+    "imagen": "https://content-historia.nationalgeographic.com.es/medio/2023/10/19/opera-1_f81cb49e_231019165049_1280x720.jpg"
+  },
+  {
+    "nombre": "Cristo Redentor",
+    "ciudad": "Río de Janeiro",
+    "tipo": "Monumento",
+    "descripcion": "Impresionante estatua de Jesús de Nazaret que vigila la ciudad desde el cerro del Corcovado.",
+    "imagen": "https://upload.wikimedia.org/wikipedia/commons/3/39/Cristo_Redentor_do_Rio_de_Janeiro_0.jpg"
+  },
+  {
+    "nombre": "Gran Muralla China",
+    "ciudad": "Jinshanling",
+    "tipo": "Histórico",
+    "descripcion": "Serie de fortificaciones construidas para proteger los estados chinos contra las invasiones.",
+    "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/The_Great_Wall_of_China_at_Jinshanling-edit.jpg/1280px-The_Great_Wall_of_China_at_Jinshanling-edit.jpg"
+  },
+  {
+    "nombre": "Acrópolis de Atenas",
+    "ciudad": "Atenas",
+    "tipo": "Histórico",
+    "descripcion": "Antigua ciudadela que contiene los restos de varios edificios antiguos de gran importancia arquitectónica.",
+    "imagen": "https://content-historia.nationalgeographic.com.es/medio/2023/03/08/istock_00000000_230308154002_960x640.jpg"
+  },
+  {
+    "nombre": "Santuario Fushimi Inari",
+    "ciudad": "Kioto",
+    "tipo": "Templo",
+    "descripcion": "Famoso por sus miles de puertas torii rojas que serpentean por el monte Inari.",
+    "imagen": "https://www.agoda.com/wp-content/uploads/2024/09/Shitennoji-Temple-pagoda-Osaka-Japan-featured-1244x700.jpg"
+  },
+  {
+    "nombre": "Big Ben",
+    "ciudad": "Londres",
+    "tipo": "Monumento",
+    "descripcion": "Nombre con el que se conoce a la gran campana del reloj situado en el Palacio de Westminster.",
+    "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Clock_Tower_-_Palace_of_Westminster%2C_London_-_May_2007.jpg/1280px-Clock_Tower_-_Palace_of_Westminster%2C_London_-_May_2007.jpg"
+  },
+  {
+    "nombre": "Sagrada Familia",
+    "ciudad": "Barcelona",
+    "tipo": "Arquitectura",
+    "descripcion": "Basílica católica diseñada por Gaudí, máxima exponente de la arquitectura modernista catalana.",
+    "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Sagrada_Familia_01.jpg/1280px-Sagrada_Familia_01.jpg"
+  },
+  {
+    "nombre": "Puerta de Brandeburgo",
+    "ciudad": "Berlín",
+    "tipo": "Monumento",
+    "descripcion": "Antigua puerta de entrada a Berlín y uno de los principales símbolos de la capital alemana.",
+    "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Brandenburger_Tor_abends.jpg/1280px-Brandenburger_Tor_abends.jpg"
+  },
+  {
+    "nombre": "Petra",
+    "ciudad": "Wadi Musa",
+    "tipo": "Histórico",
+    "descripcion": "Ciudad excavada por completo en las rocas de arenisca rosa, antigua capital de los nabateos.",
+    "imagen": "https://agoratravel.net/wp-content/uploads/2022/03/monasterio-en-petra-JORDANIA-e1656066348562-1024x683.jpg"
+  },
+  {
+    "nombre": "Gran Cañón",
+    "ciudad": "Arizona",
+    "tipo": "Naturaleza",
+    "descripcion": "Una inmensa garganta esculpida por el río Colorado a lo largo de millones de años.",
+    "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Grand_Canyon_view_from_Pima_Point_2010.jpg/1280px-Grand_Canyon_view_from_Pima_Point_2010.jpg"
+  },
+  {
+    "nombre": "Torre de Pisa",
+    "ciudad": "Pisa",
+    "tipo": "Monumento",
+    "descripcion": "Campanario de la catedral de Pisa, famoso mundialmente por su inclinación no planeada.",
+    "imagen": "https://www.atrapalo.com/houdinis/wp-content/uploads/2012/10/pisa-3-e1427303003318.jpg"
+  },
+  {
+    "nombre": "Chichén Itzá",
+    "ciudad": "Yucatán",
+    "tipo": "Histórico",
+    "descripcion": "Complejo de ruinas mayas famoso por su pirámide escalonada conocida como El Castillo.",
+    "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Chichen_Itza_3.jpg/1280px-Chichen_Itza_3.jpg"
+  },
+  {
+    "nombre": "Burj Khalifa",
+    "ciudad": "Dubái",
+    "tipo": "Arquitectura",
+    "descripcion": "El edificio más alto jamás construido por el ser humano, con 828 metros de altura.",
+    "imagen": "https://www.civitatis.com/f/emiratos-arabes-unidos/dubai/guia/burj-khalifa.jpg"
+  },
+  {
+    "nombre": "Golden Gate",
+    "ciudad": "San Francisco",
+    "tipo": "Puente",
+    "descripcion": "Puente colgante de color naranja internacional que cruza el estrecho del mismo nombre.",
+    "imagen": "https://www.queenanne.com/resourcefiles/things-to-do/golden-gate-bridge-at-san-francisco-california.jpg"
+  },
+  {
+    "nombre": "Pirámide del Louvre",
+    "ciudad": "París",
+    "tipo": "Museo",
+    "descripcion": "Pirámide de vidrio y metal que sirve como entrada principal al Museo del Louvre.",
+    "imagen": "https://visitingparisbyyourself.com/wp-content/uploads/2022/03/pyramide-louvre-by-night-with-small-pyramid-on-left-1024x406.jpg"
+  },
+  {
+    "nombre": "Mont Saint-Michel",
+    "ciudad": "Normandía",
+    "tipo": "Histórico",
+    "descripcion": "Pueblo medieval y abadía construidos sobre un islote rocoso rodeado de mareas.",
+    "imagen": "https://upload.wikimedia.org/wikipedia/commons/d/d1/Mont_St_Michel_3%2C_Brittany%2C_France_-_July_2011.jpg"
+  },
+  {
+    "nombre": "Cataratas del Niágara",
+    "ciudad": "Ontario",
+    "tipo": "Naturaleza",
+    "descripcion": "Poderoso conjunto de cascadas situadas en el río Niágara, frontera entre Canadá y EE.UU.",
+    "imagen": "https://viajaralaaurora.com/wp-content/uploads/2022/11/Niagara-1-1.jpeg"
+  },
+  {
+    "nombre": "Catedral de San Basilio",
+    "ciudad": "Moscú",
+    "tipo": "Histórico",
+    "descripcion": "Iglesia ortodoxa famosa por sus cúpulas de colores con forma de bulbo en la Plaza Roja.",
+    "imagen": "https://www.discovertravelnews.com/wp-content/uploads/2020/07/Moscu_San-Basilio-1024x576.jpg"
+  },
+  {
+    "nombre": "Monte Fuji",
+    "ciudad": "Shizuoka",
+    "tipo": "Naturaleza",
+    "descripcion": "Montaña sagrada de Japón, un volcán inactivo con una silueta perfectamente simétrica.",
+    "imagen": "https://content-viajes.nationalgeographic.com.es/medio/2024/05/17/monte-fuji_00000000_240517125539_960x541.jpg"
+  },
+  {
+    "nombre": "Stonehenge",
+    "ciudad": "Wiltshire",
+    "tipo": "Histórico",
+    "descripcion": "Monumento prehistórico de piedra rodeado de misterios sobre su construcción y uso.",
+    "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Stonehenge2007_07_30.jpg/1280px-Stonehenge2007_07_30.jpg"
+  },
+  {
+    "nombre": "Empire State Building",
+    "ciudad": "Nueva York",
+    "tipo": "Arquitectura",
+    "descripcion": "Rascacielos Art Déco que fue el edificio más alto del mundo durante cuatro décadas.",
+    "imagen": "https://cdn.britannica.com/73/114973-050-2DC46083/Midtown-Manhattan-Empire-State-Building-New-York.jpg"
+  },
+  {
+    "nombre": "Basílica de San Pedro",
+    "ciudad": "Vaticano",
+    "tipo": "Histórico",
+    "descripcion": "La iglesia cristiana más grande del mundo y centro espiritual del catolicismo.",
+    "imagen": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/St_Peter%27s_Square%2C_Vatican_City_-_April_2007.jpg/1280px-St_Peter%27s_Square%2C_Vatican_City_-_April_2007.jpg"
+  },
+  {
+    "nombre": "Templo de Luxor",
+    "ciudad": "Luxor",
+    "tipo": "Histórico",
+    "descripcion": "Gran complejo de templos egipcios situados en la orilla este del río Nilo.",
+    "imagen": "https://content-viajes.nationalgeographic.com.es/medio/2021/06/11/una-avenida-entre-dos-templos_dd8d250a_1200x799.jpg"
+  },
+  {
+    "nombre": "Cataratas del Iguazú",
+    "ciudad": "Misiones",
+    "tipo": "Naturaleza",
+    "descripcion": "Espectacular sistema de cascadas compartido por Argentina y Brasil, una de las maravillas naturales.",
+    "imagen": "https://www.fundacionaquae.org/wp-content/uploads/2016/01/WikiCatarataIguazu.jpg"
+  },
+  {
+    "nombre": "Torre de Londres",
+    "ciudad": "Londres",
+    "tipo": "Histórico",
+    "descripcion": "Fortaleza histórica que ha servido como palacio real, prisión y arsenal.",
+    "imagen": "https://www.civitatis.com/f/reino-unido/londres/guia/torre-de-londres.jpg"
+  }
+]

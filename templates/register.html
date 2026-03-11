@@ -4,62 +4,103 @@
     <meta charset="UTF-8">
     <title>Registro - TravelLog</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
-        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .auth-card { border-radius: 15px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        .btn-explorer { background-color: #20c997; color: white; border-radius: 50px; padding: 10px 20px; font-weight: 600; transition: 0.3s; }
-        .btn-explorer:hover { background-color: #1aa179; color: white; transform: translateY(-2px); }
-
-        input[type="text"], input[type="email"], input[type="password"] {
-            display: block; width: 100%; padding: 0.75rem; font-size: 1rem;
-            color: #212529; background-color: #fff; border: 1px solid #ced4da;
-            border-radius: 0.5rem; margin-bottom: 1.5rem; transition: border-color 0.15s ease-in-out;
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            font-family: 'Segoe UI', sans-serif;
         }
-        input:focus { border-color: #20c997; outline: 0; box-shadow: 0 0 0 0.25rem rgba(32, 201, 151, 0.25); }
-        label { font-weight: 600; margin-bottom: 0.5rem; color: #495057; }
-        .helptext, ul.errorlist { font-size: 0.85em; color: #dc3545; list-style: none; padding-left: 0; margin-top: -1rem; margin-bottom: 1rem; }
+        .card-registro {
+            border: none;
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+        .form-control, .form-select {
+            border-radius: 10px;
+            padding: 12px;
+            border: 1px solid #dee2e6;
+        }
+        .form-control:focus {
+            box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+            border-color: #667eea;
+        }
+        .btn-registro {
+            background: linear-gradient(to right, #667eea, #764ba2);
+            border: none;
+            color: white;
+            font-weight: 700;
+            padding: 12px;
+            border-radius: 50px;
+            transition: 0.3s;
+        }
+        .btn-registro:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            color: white;
+        }
+        .error-msg {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #dc3545;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
-    <div class="container mt-5 pt-4">
-        <div class="row justify-content-center">
-            <div class="col-md-5">
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card card-registro p-4 p-md-5 bg-white">
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold text-dark">Crear Cuenta</h2>
+                    <p class="text-muted">Únete a la comunidad de viajeros</p>
+                </div>
 
                 {% if messages %}
                     {% for message in messages %}
-                        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm" role="alert">
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-4 rounded-3" role="alert">
                             {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
                     {% endfor %}
                 {% endif %}
 
-                <div class="card auth-card p-4">
-                    <div class="card-body">
-                        <div class="text-center mb-4">
-                            <h2 class="fw-bold" style="color: #2c3e50;">Únete a TravelLog</h2>
-                            <p class="text-muted">Comienza a documentar tus aventuras</p>
-                        </div>
+                <form method="POST">
+                    {% csrf_token %}
 
-                        <form method="POST">
-                            {% csrf_token %}
-                            {{ form.as_p }}
-
-                            <div class="d-grid mt-4">
-                                <button type="submit" class="btn btn-explorer">Comenzar mi Viaje</button>
-                            </div>
-                        </form>
-
-                        <div class="text-center mt-4">
-                            <p class="text-muted">¿Ya tienes cuenta? <a href="{% url 'login' %}" style="color: #20c997; font-weight: 600; text-decoration: none;">Inicia sesión</a></p>
-                            <a href="{% url 'inicio' %}" class="text-decoration-none text-muted small">← Volver al inicio</a>
-                        </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-uppercase text-muted">Nombre</label>
+                        {{ form.nombre }} {% for error in form.nombre.errors %}<div class="error-msg">{{ error }}</div>{% endfor %}
                     </div>
-                </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-uppercase text-muted">Email</label>
+                        {{ form.email }}
+                        {% for error in form.email.errors %}<div class="error-msg"><i class="bi bi-exclamation-circle"></i> {{ error }}</div>{% endfor %}
+                        <small class="text-muted" style="font-size: 0.75rem;">Aceptamos Gmail, Outlook, Hotmail, Yahoo e iCloud.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-uppercase text-muted">Contraseña</label>
+                        {{ form.password }}
+                        {% for error in form.password.errors %}<div class="error-msg"><i class="bi bi-shield-lock"></i> {{ error }}</div>{% endfor %}
+                        <small class="text-muted" style="font-size: 0.75rem;">Mín. 8 caracteres, incluye mayúscula y número.</small>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-registro">Comenzar Aventura</button>
+                        <a href="{% url 'login' %}" class="btn btn-link text-decoration-none text-center text-muted small">¿Ya tienes cuenta? Inicia sesión</a>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

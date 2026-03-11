@@ -14,4 +14,7 @@ urlpatterns = [
     path('lugares/', views.gestionar_lugares, name='gestionar_lugares'),
     path('lugares/eliminar/<str:lugar_nombre>/', views.eliminar_lugar, name='eliminar_lugar'),
     path('lugares/editar/<str:lugar_nombre>/', views.editar_lugar, name='editar_lugar'),
+    path('sincronizar/', views.sincronizar_datos, name='sincronizar_datos'),
+    path('lugares/borrar-todo/', views.borrar_todo_lugares, name='borrar_todo_lugares'),
+    path('regiones/borrar-todo/', views.borrar_todo_regiones, name='borrar_todo_regiones'),
 ]

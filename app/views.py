@@ -2,8 +2,11 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .forms import RegistroForm, LoginForm, RegionForm, LugarForm
+from .forms import RegistroForm, LoginForm, RegionForm, LugarForm, ImportarArchivoForm
 from .models import Region, Lugar
+import json
+import csv
+import io
 
 
 # 1. Página de inicio
@@ -19,11 +22,19 @@ def registrar_usuario(request):
     if request.method == 'POST':
         form = RegistroForm(request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(request, '¡Aventura desbloqueada! Registro completado. Ya puedes iniciar sesión.')
+            user = form.save(commit=False)
+
+            user.nombre = form.cleaned_data.get('nombre')
+
+            user.rol = 'viajero'
+            user.is_superuser = False
+            user.is_staff = False
+
+            user.save()
+            messages.success(request, '¡Registro completado con éxito!')
             return redirect('login')
         else:
-            messages.error(request, 'Ocurrió un error en el registro. Revisa los datos.')
+            messages.error(request, 'Revisa los errores en el formulario.')
     else:
         form = RegistroForm()
     return render(request, 'register.html', {'form': form})
@@ -213,3 +224,85 @@ def eliminar_lugar(request, lugar_nombre):
         messages.error(request, 'El lugar no existe o ya fue borrado.')
 
     return redirect('gestionar_lugares')
+
+# 12. Sincronizar Datos desde Archivo
+@login_required(login_url='login')
+def sincronizar_datos(request):
+
+    if request.user.rol != 'admin' and not request.user.is_superuser:
+        messages.error(request, 'Acceso denegado.')
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = ImportarArchivoForm(request.POST, request.FILES)
+        if form.is_valid():
+            archivo = request.FILES['archivo']
+            nombre_archivo = archivo.name.lower()
+            contador = 0
+
+            try:
+                # --- CASO 1: ARCHIVO JSON -> PUNTOS DE INTERÉS (LUGARES) ---
+                if nombre_archivo.endswith('.json'):
+                    data = json.load(archivo)
+                    lista_lugares = data if isinstance(data, list) else [data]
+
+                    for item in lista_lugares:
+                        if not Lugar.objects.using('mongodb').filter(nombre=item['nombre']).exists():
+                            Lugar.objects.using('mongodb').create(
+                                nombre=item['nombre'],
+                                ciudad=item.get('ciudad', 'Desconocida'),
+                                tipo=item.get('tipo', 'Otros'),
+                                descripcion=item.get('descripcion', ''),
+                                imagen=item.get('imagen', '')
+                            )
+                            contador += 1
+                    messages.success(request, f'✅ Se han importado {contador} Lugares desde el JSON.')
+
+                # --- CASO 2: ARCHIVO CSV -> REGIONES ---
+                elif nombre_archivo.endswith('.csv'):
+                    decoded_file = archivo.read().decode('utf-8')
+                    io_string = io.StringIO(decoded_file)
+                    reader = csv.DictReader(io_string)
+
+                    for row in reader:
+                        if not Region.objects.using('mongodb').filter(nombre=row['nombre']).exists():
+                            Region.objects.using('mongodb').create(
+                                nombre=row['nombre'],
+                                pais=row.get('pais', 'Desconocido')
+                            )
+                            contador += 1
+                    messages.success(request, f'✅ Se han importado {contador} Regiones desde el CSV.')
+
+                else:
+                    messages.error(request, '❌ Formato no soportado. Usa .json para Lugares o .csv para Regiones.')
+
+                return redirect('home')  # O a la gestión que prefieras
+
+            except Exception as e:
+                messages.error(request, f'❌ Error crítico al procesar: {e}')
+    else:
+        form = ImportarArchivoForm()
+
+    return render(request, 'sincronizar.html', {'form': form})
+
+# 13. Borrado masivo de lugares y regiones (solo para admin)
+@login_required(login_url='login')
+def borrar_todo_lugares(request):
+
+    if request.user.rol != 'admin' and not request.user.is_superuser:
+        return redirect('home')
+
+    Lugar.objects.using('mongodb').all().delete()
+    messages.success(request, "💥 Catálogo de lugares vaciado por completo.")
+    return redirect('gestionar_lugares')
+
+# 14. Borrado masivo de lugares y regiones (solo para admin)
+@login_required(login_url='login')
+def borrar_todo_regiones(request):
+
+    if request.user.rol != 'admin' and not request.user.is_superuser:
+        return redirect('home')
+
+    Region.objects.using('mongodb').all().delete()
+    messages.success(request, "💥 Lista de regiones vaciada por completo.")
+    return redirect('gestionar_regiones')
