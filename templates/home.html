@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Campamento Base - TravelLog</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar { background-color: #ffffff; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .navbar-brand { font-weight: 700; color: #20c997 !important; }
+        .card { border: none; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: 0.3s; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .btn-explorer { background-color: #20c997; color: white; border-radius: 50px; font-weight: 600; padding: 10px 20px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light mb-4 p-3">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">✈️ TravelLog</a>
+            <div class="d-flex align-items-center gap-3">
+                <span class="text-muted">Hola, <strong>{{ user.nombre }}</strong></span>
+                <a href="{% url 'logout' %}" class="btn btn-outline-danger btn-sm rounded-pill px-3">Desconectar</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <h2 class="fw-bold mb-4" style="color: #2c3e50;">Tu Campamento Base</h2>
+
+        <div class="row g-4">
+            {% if user.rol == 'viajero' or user.is_superuser %}
+            <div class="col-md-6">
+                <div class="card p-4 h-100 border-start border-4 border-success">
+                    <div class="card-body">
+                        <h4 class="card-title fw-bold">🌍 Explorar Destinos</h4>
+                        <p class="card-text text-muted">Descubre nuevos lugares, monumentos y añade tus valoraciones.</p>
+                        <a href="#" class="btn btn-explorer mt-2">Ver Catálogo</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card p-4 h-100 border-start border-4 border-info">
+                    <div class="card-body">
+                        <h4 class="card-title fw-bold">🗺️ Mis Itinerarios</h4>
+                        <p class="card-text text-muted">Consulta y crea tus rutas de viaje personalizadas.</p>
+                        <a href="#" class="btn btn-outline-info mt-2 rounded-pill fw-bold px-4">Gestionar Rutas</a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if user.rol == 'admin' or user.is_superuser %}
+            <div class="col-12 mt-5">
+                <h3 class="fw-bold text-danger mb-3">🛠️ Panel de Control (Root)</h3>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="card p-3 bg-dark text-white h-100">
+                            <div class="card-body">
+                                <h5 class="card-title fw-bold">📍 Gestión de Regiones</h5>
+                                <a href="{% url 'gestionar_regiones' %}" class="btn btn-light btn-sm rounded-pill mt-2 px-3">Administrar</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card p-3 bg-dark text-white h-100">
+                            <div class="card-body">
+                                <h5 class="card-title fw-bold">🏛️ Puntos de Interés</h5>
+                                <a href="{% url 'gestionar_lugares' %}" class="btn btn-light btn-sm rounded-pill mt-2 px-3">Administrar</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card p-3 bg-danger text-white h-100 border-0">
+                            <div class="card-body">
+                                <h5 class="card-title fw-bold">⚡ Sincronizar API</h5>
+                                <a href="#" class="btn btn-light btn-sm rounded-pill mt-2 px-3 text-danger fw-bold">Ejecutar Carga</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

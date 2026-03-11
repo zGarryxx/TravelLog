@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Iniciar Sesión - TravelLog</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .auth-card { border-radius: 15px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .btn-explorer { background-color: #20c997; color: white; border-radius: 50px; padding: 10px 20px; font-weight: 600; transition: 0.3s; }
+        .btn-explorer:hover { background-color: #1aa179; color: white; transform: translateY(-2px); }
+        input[type="text"], input[type="email"], input[type="password"] {
+            display: block; width: 100%; padding: 0.75rem; border: 1px solid #ced4da; border-radius: 0.5rem; margin-bottom: 1.5rem;
+        }
+        input:focus { border-color: #20c997; outline: 0; box-shadow: 0 0 0 0.25rem rgba(32, 201, 151, 0.25); }
+        label { font-weight: 600; margin-bottom: 0.5rem; color: #495057; }
+    </style>
+</head>
+<body>
+    <div class="container mt-5 pt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <div class="card auth-card p-4">
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <h2 class="fw-bold" style="color: #2c3e50;">Bienvenido de nuevo</h2>
+                            <p class="text-muted">Accede a tu cuenta para continuar explorando</p>
+                        </div>
+                        <form method="POST">
+                            {% csrf_token %}
+                            {{ form.as_p }}
+                            <div class="d-grid mt-4">
+                                <button type="submit" class="btn btn-explorer">Entrar al Campamento Base</button>
+                            </div>
+                        </form>
+                        <div class="text-center mt-4">
+                            <p class="text-muted">¿No tienes cuenta? <a href="{% url 'register' %}" style="color: #20c997; text-decoration: none; font-weight: bold;">Regístrate</a></p>
+                            <a href="{% url 'inicio' %}" class="text-decoration-none text-muted small">← Volver al inicio</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
