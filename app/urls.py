@@ -17,4 +17,9 @@ urlpatterns = [
     path('sincronizar/', views.sincronizar_datos, name='sincronizar_datos'),
     path('lugares/borrar-todo/', views.borrar_todo_lugares, name='borrar_todo_lugares'),
     path('regiones/borrar-todo/', views.borrar_todo_regiones, name='borrar_todo_regiones'),
+    path('explorar/', views.explorar_destinos, name='explorar_destinos'),
+    path('destino/<str:nombre_lugar>/', views.detalle_lugar, name='detalle_lugar'),
+    path('guardar-resena/<str:nombre_lugar>/', views.guardar_resena, name='guardar_resena'),
+    path('borrar-resena/<str:nombre_lugar>/', views.borrar_resena, name='borrar_resena'),
+    path('toggle-favorito/<str:nombre_lugar>/', views.toggle_favorito, name='toggle_favorito'),
 ]

@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold text-dark">🌏 Explora el Mundo</h1>
+        <p class="lead text-muted">Encuentra monumentos, museos y lugares increíbles</p>
+    </div>
+
+    <div class="card p-4 shadow-sm border-0 mb-5" style="border-radius: 20px; background-color: white;">
+        <form method="GET" action="{% url 'explorar_destinos' %}" class="row g-3 align-items-end">
+
+            {% if user.is_authenticated %}
+            <div class="col-12 border-bottom pb-3 mb-1">
+                <div class="form-check form-switch d-flex align-items-center">
+                    <input class="form-check-input me-2 shadow-sm" type="checkbox" role="switch" id="filtroFavoritos" name="solo_favoritos" value="1"
+                           style="width: 3em; height: 1.5em; cursor: pointer;"
+                           {% if solo_favoritos_actual == '1' %}checked{% endif %}
+                           onchange="this.form.submit()"> <label class="form-check-label fw-bold text-dark mb-0 pt-1" for="filtroFavoritos" style="cursor: pointer; font-size: 1.1rem;">
+                        <i class="bi bi-heart-fill text-danger me-2"></i>Mostrar solo mis lugares favoritos
+                    </label>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold text-secondary small ps-2">BUSCAR LUGAR</label>
+                <input type="text" name="nombre" class="form-control rounded-pill"
+                       placeholder="Ej: Torre, Museo..." value="{{ nombre_actual }}">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold text-secondary small ps-2">CIUDAD</label>
+                <select name="ciudad" class="form-select rounded-pill">
+                    <option value="">Todas las ciudades</option>
+                    {% for c in ciudades %}
+                        <option value="{{ c }}" {% if c == ciudad_actual %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold text-secondary small ps-2">TIPO DE LUGAR</label>
+                <select name="categoria" class="form-select rounded-pill">
+                    <option value="">Cualquier tipo</option>
+                    {% for cat in categorias %}
+                        <option value="{{ cat }}" {% if cat == categoria_actual %}selected{% endif %}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold shadow-sm">
+                        <i class="bi bi-funnel"></i> Filtrar
+                    </button>
+                    <a href="{% url 'explorar_destinos' %}" class="btn btn-outline-secondary rounded-pill shadow-sm" title="Limpiar">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for destino in destinos %}
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm card-destino" style="border-radius: 20px; transition: 0.3s; overflow: hidden;">
+                    <div style="height: 220px; overflow: hidden;">
+                        {% if destino.imagen %}
+                            <img src="{{ destino.imagen }}" class="w-100 h-100" style="object-fit: cover;" alt="{{ destino.nombre }}">
+                        {% else %}
+                            <img src="https://via.placeholder.com/400x250?text=Sin+Imagen" class="w-100 h-100" style="object-fit: cover;">
+                        {% endif %}
+                    </div>
+
+                    <div class="card-body">
+                        <span class="badge rounded-pill bg-light text-primary px-3 mb-2">{{ destino.tipo }}</span>
+                        <h5 class="card-title fw-bold text-dark">{{ destino.nombre }}</h5>
+                        <p class="text-muted mb-3">
+                            <i class="bi bi-geo-alt-fill text-danger"></i> {{ destino.ciudad }}
+                        </p>
+                        <p class="card-text text-secondary small">
+                            {{ destino.descripcion|truncatechars:100 }}
+                        </p>
+                    </div>
+
+                    <div class="card-footer bg-white border-0 pb-4 px-4 text-center">
+                        <a href="{% url 'detalle_lugar' destino.nombre %}" class="btn btn-outline-primary w-100 rounded-pill fw-bold">
+                            Ver detalles
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            </div> <div class="d-flex flex-column align-items-center justify-content-center mt-5 py-5 w-100 text-center">
+                <div class="mb-4">
+                    <i class="bi bi-search-heart text-muted" style="font-size: 6rem; opacity: 0.3;"></i>
+                </div>
+                <h2 class="fw-bold text-dark display-6">¡Vaya! No hay coincidencias</h2>
+                <p class="text-muted fs-5 mb-4" style="max-width: 500px;">
+                    No hemos encontrado ningún destino que encaje con tus filtros actuales.
+                    Prueba a buscar con términos más generales o limpia los filtros.
+                </p>
+                <a href="{% url 'explorar_destinos' %}" class="btn btn-primary btn-lg rounded-pill px-5 py-3 shadow-lg fw-bold border-0"
+                   style="background: linear-gradient(to right, #667eea, #764ba2); color: white;">
+                    <i class="bi bi-arrow-counterclockwise me-2"></i> Restablecer búsqueda
+                </a>
+            </div>
+            <div class="row">
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .card-destino:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
+    }
+</style>
+{% endblock %}
