@@ -1,0 +1,310 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<style>
+    body {
+        background-color: #f4f7f6;
+    }
+
+    .header-detalle {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        border-radius: 24px;
+        padding: 3rem 2rem;
+        color: white;
+        margin-bottom: 2rem;
+        box-shadow: 0 15px 35px rgba(15, 23, 42, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-back {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+    .btn-back:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        transform: translateX(-5px);
+    }
+
+    #mapa-itinerario {
+        height: 350px;
+        border-radius: 24px;
+        margin-bottom: 3rem;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+        border: 4px solid white;
+        z-index: 1;
+    }
+
+    .timeline {
+        position: relative;
+        padding-left: 3rem;
+        margin-bottom: 4rem;
+    }
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 1.25rem;
+        top: 2rem;
+        bottom: 2rem;
+        width: 4px;
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 2.5rem;
+    }
+
+    .timeline-dot {
+        position: absolute;
+        left: -2.35rem;
+        top: 1.5rem;
+        width: 24px;
+        height: 24px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: 4px solid #f4f7f6;
+        border-radius: 50%;
+        z-index: 2;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+    }
+
+    .card-parada {
+        border: none;
+        border-radius: 20px;
+        background: white;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    .card-parada:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+    }
+
+    .img-parada {
+        width: 100%;
+        height: 100%;
+        min-height: 200px;
+        object-fit: cover;
+    }
+
+    .empty-state {
+        padding: 5rem 2rem;
+        text-align: center;
+        background: white;
+        border-radius: 24px;
+        border: 2px dashed #cbd5e1;
+    }
+
+    .transition-hover {
+        transition: all 0.2s ease;
+    }
+    .transition-hover:hover {
+        transform: scale(1.05);
+    }
+</style>
+
+<div class="container py-5">
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4" role="alert"
+                 style="background-color: {% if message.tags == 'success' %}#d1fae5{% elif message.tags == 'info' %}#dbeafe{% else %}#fef3c7{% endif %};">
+                <i class="bi {% if message.tags == 'success' %}bi-check-circle-fill text-success{% elif message.tags == 'info' %}bi-info-circle-fill text-info{% else %}bi-exclamation-circle-fill text-warning{% endif %} me-2"></i>
+                <span class="text-dark fw-medium">{{ message }}</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="header-detalle animate__animated animate__fadeInDown">
+        <a href="{% url 'mis_itinerarios' %}" class="btn btn-back rounded-pill px-4 py-2 mb-4 shadow-sm fw-medium">
+            <i class="bi bi-arrow-left me-2"></i> Volver a Mis Rutas
+        </a>
+
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end">
+            <div>
+                <span class="badge bg-white text-primary rounded-pill px-3 py-2 mb-3 shadow-sm fw-bold" style="font-size: 0.85rem;">
+                    <i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ paradas_info|length }} Paradas
+                </span>
+                <h1 class="fw-bolder display-5 mb-1">{{ ruta.titulo }}</h1>
+                <p class="text-light opacity-75 mb-0 fs-5"><i class="bi bi-calendar3 me-2"></i> Creado el {{ ruta.fecha_creacion|date:"d M Y" }}</p>
+            </div>
+
+            <div class="mt-4 mt-md-0">
+                <a href="{% url 'explorar_destinos' %}" class="btn btn-light rounded-pill px-4 py-3 fw-bold shadow">
+                    <i class="bi bi-search me-2 text-primary"></i> Buscar más lugares
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% if paradas_info %}
+
+        <div id="mapa-itinerario" class="animate__animated animate__fadeIn"></div>
+
+        <div class="timeline animate__animated animate__fadeInUp">
+            {% for parada in paradas_info %}
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+
+                    <div class="card card-parada">
+                        <div class="row g-0">
+                            <div class="col-md-4">
+                                <img src="{{ parada.imagen }}" class="img-parada rounded-start" alt="{{ parada.nombre }}">
+                            </div>
+
+                            <div class="col-md-8">
+                                <div class="card-body p-4 p-lg-5 h-100 d-flex flex-column justify-content-center">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <span class="badge bg-light text-primary rounded-pill px-3 py-2 fw-bold border">{{ parada.tipo|upper }}</span>
+                                        <span class="text-muted fw-bold fs-5 opacity-25">#{{ forloop.counter }}</span>
+                                    </div>
+
+                                    <h2 class="fw-bold text-dark mb-1">{{ parada.nombre }}</h2>
+                                    <p class="text-muted fw-medium mb-4 fs-5">
+                                        <i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ parada.ciudad }}
+                                    </p>
+
+                                    <p class="text-secondary mb-4">{{ parada.descripcion|truncatechars:150 }}</p>
+
+                                    <div class="mt-auto d-flex justify-content-between align-items-center border-top pt-3">
+
+                                        <div class="d-flex gap-2">
+                                            <a href="{% url 'detalle_lugar' parada.nombre %}" class="btn btn-dark rounded-pill px-4 py-2 fw-bold shadow-sm">
+                                                Ver Detalles
+                                            </a>
+                                            <button type="button" class="btn btn-outline-danger rounded-pill px-3 py-2 fw-bold transition-hover" title="Quitar de ruta" data-bs-toggle="modal" data-bs-target="#quitarParadaModal{{ forloop.counter }}">
+                                                <i class="bi bi-x-circle-fill"></i>
+                                            </button>
+                                        </div>
+
+                                        <div class="d-flex gap-2">
+                                            <a href="{% url 'mover_parada' ruta.id parada.nombre 'up' %}"
+                                               class="btn btn-light rounded-circle shadow-sm border transition-hover {% if forloop.first %}disabled opacity-25{% endif %}"
+                                               style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;" title="Subir parada">
+                                                <i class="bi bi-arrow-up text-dark fw-bolder"></i>
+                                            </a>
+
+                                            <a href="{% url 'mover_parada' ruta.id parada.nombre 'down' %}"
+                                               class="btn btn-light rounded-circle shadow-sm border transition-hover {% if forloop.last %}disabled opacity-25{% endif %}"
+                                               style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;" title="Bajar parada">
+                                                <i class="bi bi-arrow-down text-dark fw-bolder"></i>
+                                            </a>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+
+            <div class="position-relative" style="margin-left: -2.35rem;">
+                <div class="d-flex align-items-center">
+                    <div class="bg-dark rounded-circle border border-4 border-white d-flex justify-content-center align-items-center z-index-2 shadow-sm" style="width: 24px; height: 24px; z-index: 2;">
+                        <div class="bg-white rounded-circle" style="width: 8px; height: 8px;"></div>
+                    </div>
+                    <span class="ms-3 fw-bold text-muted text-uppercase" style="letter-spacing: 2px; font-size: 0.8rem;">Fin del trayecto</span>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="empty-state animate__animated animate__zoomIn">
+            <i class="bi bi-signpost-split text-muted opacity-25 mb-4" style="font-size: 5rem;"></i>
+            <h2 class="fw-bold text-dark">Tu ruta está vacía</h2>
+            <p class="text-muted fs-5 mb-5" style="max-width: 500px; margin: 0 auto;">
+                Aún no has añadido ninguna parada a <strong>"{{ ruta.titulo }}"</strong>. ¡Ve al catálogo y empieza a organizar tu aventura!
+            </p>
+            <a href="{% url 'explorar_destinos' %}" class="btn btn-primary btn-lg rounded-pill px-5 fw-bold shadow" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+                <i class="bi bi-compass me-2"></i> Explorar Destinos
+            </a>
+        </div>
+    {% endif %}
+
+</div>
+
+{% if paradas_info %}
+    {% for parada in paradas_info %}
+        <div class="modal fade" id="quitarParadaModal{{ forloop.counter }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="border-radius: 20px; border: none; box-shadow: 0 20px 50px rgba(0,0,0,0.1);">
+                    <div class="modal-body p-4 p-md-5 text-center">
+                        <div class="text-danger mb-3">
+                            <i class="bi bi-node-minus" style="font-size: 3.5rem;"></i>
+                        </div>
+                        <h4 class="fw-bold text-dark">¿Quitar parada?</h4>
+                        <p class="text-secondary mb-4">
+                            Estás a punto de eliminar <strong>"{{ parada.nombre }}"</strong> de tu viaje. <br>
+                            Podrás volver a añadirlo más tarde desde el catálogo si cambias de opinión.
+                        </p>
+
+                        <div class="d-flex gap-3 justify-content-center">
+                            <button type="button" class="btn btn-light rounded-pill px-4 fw-medium shadow-sm" data-bs-dismiss="modal">Cancelar</button>
+                            <a href="{% url 'eliminar_parada' ruta.id parada.nombre %}" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm">Sí, quitar parada</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var map = L.map('mapa-itinerario').setView([48.8566, 2.3522], 4);
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+            }).addTo(map);
+
+            const paradas = [
+                {% for parada in paradas_info %}
+                    { nombre: "{{ parada.nombre|escapejs }}", ciudad: "{{ parada.ciudad|escapejs }}" }{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ];
+
+            async function dibujarRuta() {
+                let latlngs = [];
+                for (let parada of paradas) {
+                    try {
+                        let response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(parada.ciudad)}`);
+                        let data = await response.json();
+
+                        if (data && data.length > 0) {
+                            let punto = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+                            latlngs.push(punto);
+                            L.marker(punto).addTo(map).bindPopup(`<b>${parada.nombre}</b><br>${parada.ciudad}`);
+                        }
+                    } catch (error) {
+                        console.error("No se pudo ubicar:", parada.ciudad);
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 1100));
+                }
+
+                if (latlngs.length > 1) {
+                    var polyline = L.polyline(latlngs, {
+                        color: '#6366f1',
+                        weight: 4,
+                        dashArray: '10, 10',
+                        opacity: 0.8
+                    }).addTo(map);
+                    map.fitBounds(polyline.getBounds(), {padding: [50, 50]});
+                } else if (latlngs.length === 1) {
+                    map.setView(latlngs[0], 10);
+                }
+            }
+
+            dibujarRuta();
+        });
+    </script>
+{% endif %}
+{% endblock %}

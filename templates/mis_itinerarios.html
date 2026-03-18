@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    body {
+        background-color: #f4f7f6;
+    }
+
+    .header-rutas {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        border-radius: 24px;
+        padding: 3rem 2rem;
+        color: white;
+        margin-bottom: 2.5rem;
+        box-shadow: 0 15px 35px rgba(15, 23, 42, 0.2);
+    }
+
+    .btn-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        transition: all 0.3s ease;
+    }
+    .btn-gradient:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(118, 75, 162, 0.4);
+        color: white;
+    }
+
+    .card-ruta {
+        border: none;
+        border-radius: 24px;
+        background: white;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.03);
+    }
+    .card-ruta:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+    }
+
+    .badge-paradas {
+        background-color: #f1f5f9;
+        color: #475569;
+        font-weight: 700;
+        font-size: 0.8rem;
+        padding: 8px 14px;
+        border-radius: 12px;
+        letter-spacing: 0.5px;
+    }
+
+    .empty-state {
+        padding: 6rem 2rem;
+        text-align: center;
+        background: white;
+        border-radius: 30px;
+        border: 2px dashed #cbd5e1;
+        box-shadow: inset 0 0 20px rgba(0,0,0,0.01);
+    }
+
+    .transition-hover {
+        transition: all 0.2s ease;
+    }
+    .transition-hover:hover {
+        transform: scale(1.05);
+    }
+</style>
+
+<div class="container py-5">
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4" role="alert"
+                 style="background-color: {% if message.tags == 'success' %}#d1fae5{% else %}#fef3c7{% endif %};">
+                <i class="bi {% if message.tags == 'success' %}bi-check-circle-fill text-success{% else %}bi-exclamation-circle-fill text-warning{% endif %} me-2"></i>
+                <span class="text-dark fw-medium">{{ message }}</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="header-rutas d-flex flex-column flex-md-row justify-content-between align-items-md-center animate__animated animate__fadeInDown">
+        <div class="mb-4 mb-md-0">
+            <h1 class="fw-bold mb-2 display-6" style="letter-spacing: -1px;">Mis Itinerarios</h1>
+            <p class="text-light opacity-75 mb-0 fs-5">Diseña, organiza y colecciona tus aventuras.</p>
+        </div>
+        <button class="btn btn-gradient btn-lg rounded-pill fw-bold px-4 shadow" data-bs-toggle="modal" data-bs-target="#modalCrearRuta">
+            <i class="bi bi-signpost-split-fill me-2"></i> Crear Nueva Ruta
+        </button>
+    </div>
+
+    <div class="row g-4">
+        {% for ruta in rutas %}
+            <div class="col-md-6 col-lg-4 animate__animated animate__fadeInUp" style="animation-delay: {{ forloop.counter0 }}00ms;">
+                <div class="card card-ruta h-100 p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div class="bg-light p-3 rounded-circle d-flex align-items-center justify-content-center" style="width: 55px; height: 55px;">
+                            <i class="bi bi-map text-primary fs-3"></i>
+                        </div>
+                        <span class="badge-paradas">
+                            <i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ ruta.paradas|length }} paradas
+                        </span>
+                    </div>
+
+                    <h4 class="fw-bold text-dark mb-1">{{ ruta.titulo }}</h4>
+                    <p class="text-muted small mb-4 fw-medium"><i class="bi bi-calendar3 me-1"></i> Creada el {{ ruta.fecha_creacion|date:"d M Y" }}</p>
+
+                    <div class="mt-auto pt-3 border-top d-flex gap-2">
+                        <a href="{% url 'detalle_itinerario' ruta.id %}" class="btn btn-dark w-100 rounded-pill fw-bold py-2 shadow-sm text-decoration-none text-center">
+                            Ver Paradas
+                        </a>
+
+                        <button type="button" class="btn btn-outline-danger rounded-circle d-flex align-items-center justify-content-center transition-hover"
+                                style="width: 45px; height: 45px;" title="Eliminar Ruta"
+                                data-bs-toggle="modal" data-bs-target="#eliminarRutaModal{{ ruta.id }}">
+                            <i class="bi bi-trash3-fill"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="eliminarRutaModal{{ ruta.id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content" style="border-radius: 20px; border: none; box-shadow: 0 20px 50px rgba(0,0,0,0.1);">
+                        <div class="modal-body p-4 p-md-5 text-center">
+                            <div class="text-danger mb-3">
+                                <i class="bi bi-trash3" style="font-size: 3.5rem;"></i>
+                            </div>
+                            <h4 class="fw-bold text-dark">¿Eliminar itinerario?</h4>
+                            <p class="text-secondary mb-4">
+                                Estás a punto de borrar tu viaje <strong>"{{ ruta.titulo }}"</strong>. <br>
+                                Esta acción no se puede deshacer y perderás todas las paradas guardadas.
+                            </p>
+
+                            <form action="{% url 'eliminar_itinerario' ruta.id %}" method="POST" class="d-flex gap-3 justify-content-center m-0">
+                                {% csrf_token %}
+                                <button type="button" class="btn btn-light rounded-pill px-4 fw-medium shadow-sm" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm">Sí, eliminar ruta</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        {% empty %}
+            <div class="col-12 animate__animated animate__zoomIn">
+                <div class="empty-state">
+                    <div class="mb-4">
+                        <i class="bi bi-compass text-muted opacity-25" style="font-size: 6rem;"></i>
+                    </div>
+                    <h2 class="fw-bold text-dark">Tu pasaporte está en blanco</h2>
+                    <p class="text-muted fs-5 mb-5" style="max-width: 500px; margin: 0 auto;">
+                        Aún no tienes ningún itinerario guardado. Empieza creando tu primera ruta para organizar todos los lugares que quieres visitar.
+                    </p>
+                    <button class="btn btn-gradient btn-lg rounded-pill px-5 fw-bold shadow" data-bs-toggle="modal" data-bs-target="#modalCrearRuta">
+                        Empezar mi primera ruta
+                    </button>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="modal fade" id="modalCrearRuta" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 28px;">
+            <div class="modal-header border-0 pt-4 px-4 pb-2">
+                <h4 class="fw-bold mb-0 text-dark">Diseñar nueva ruta</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form action="{% url 'crear_itinerario' %}" method="POST">
+                {% csrf_token %}
+                <div class="modal-body px-4 py-3">
+                    <p class="text-muted small mb-4">Dale un nombre épico a tu viaje. Luego podrás añadir todos los monumentos y lugares que quieras desde el catálogo.</p>
+
+                    <div class="mb-2">
+                        <label class="form-label fw-bold text-secondary small text-uppercase" style="letter-spacing: 1px;">Título del viaje</label>
+                        <input type="text" name="titulo" class="form-control bg-light border-0 p-3 fs-5 text-dark fw-medium shadow-none"
+                               placeholder="Ej: Fin de semana en Roma..." required style="border-radius: 16px;">
+                    </div>
+                </div>
+
+                <div class="modal-footer border-0 pb-4 px-4 pt-2">
+                    <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-gradient rounded-pill px-4 fw-bold shadow-sm">Crear Itinerario</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

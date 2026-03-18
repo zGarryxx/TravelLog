@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import RegistroForm, LoginForm, RegionForm, LugarForm, ImportarArchivoForm
-from .models import Region, Lugar, Resena, Favorito
+from .models import Region, Lugar, Resena, Favorito, Itinerario
 import json
 import csv
 import io
@@ -355,6 +355,7 @@ def detalle_lugar(request, nombre_lugar):
 
     mi_resena = None
     es_favorito = False
+    mis_rutas = []
 
     if request.user.is_authenticated:
         mi_resena = Resena.objects.using('mongodb').filter(
@@ -365,12 +366,15 @@ def detalle_lugar(request, nombre_lugar):
             usuario_id=request.user.id, lugar_nombre=nombre_lugar
         ).exists()
 
+        mis_rutas = Itinerario.objects.using('mongodb').filter(usuario_id=request.user.id)
+
     return render(request, 'detalle_lugar.html', {
         'lugar': lugar,
         'resenas': resenas,
         'mi_resena': mi_resena,
         'url_retorno': url_retorno,
-        'es_favorito': es_favorito
+        'es_favorito': es_favorito,
+        'mis_rutas': mis_rutas
     })
 
 # 17. Guardar reseña de un lugar (puntuación y comentario) por parte de un usuario autenticado.
@@ -440,3 +444,128 @@ def toggle_favorito(request, nombre_lugar):
             messages.success(request, "¡Añadido a tus favoritos!")
 
     return redirect('detalle_lugar', nombre_lugar=nombre_lugar)
+
+# 20. Mostrar una lista de los itinerarios personalizados creados por el usuario autenticado, con la opción de ver detalles, editar o eliminar cada itinerario.
+@login_required
+def mis_itinerarios(request):
+
+    rutas = Itinerario.objects.using('mongodb').filter(usuario_id=request.user.id).order_by('-fecha_creacion')
+    return render(request, 'mis_itinerarios.html', {'rutas': rutas})
+
+# 21. Crear un nuevo itinerario para el usuario autenticado, asegurando que el título del itinerario sea proporcionado y que la lista de paradas comience vacía.
+@login_required
+def crear_itinerario(request):
+
+    if request.method == 'POST':
+        nombre_ruta = request.POST.get('titulo')
+        if nombre_ruta:
+            nueva_ruta = Itinerario(
+                usuario_id=request.user.id,
+                titulo=nombre_ruta,
+                paradas=[]
+            )
+            nueva_ruta.save(using='mongodb')
+            messages.success(request, f"¡Ruta '{nombre_ruta}' creada! Ahora añade paradas.")
+
+    return redirect('mis_itinerarios')
+
+# 22. Agregar un lugar como parada a un itinerario específico del usuario autenticado, asegurando que el lugar no se agregue más de una vez al mismo itinerario.
+@login_required
+def agregar_parada(request, nombre_lugar):
+
+    if request.method == 'POST':
+        itinerario_id = request.POST.get('itinerario_id')
+
+        if itinerario_id:
+            try:
+                ruta = Itinerario.objects.using('mongodb').get(id=itinerario_id, usuario_id=request.user.id)
+
+                if nombre_lugar not in ruta.paradas:
+                    ruta.paradas.append(nombre_lugar)
+                    ruta.save(using='mongodb')
+                    messages.success(request, f"¡Añadido a tu ruta '{ruta.titulo}'!")
+                else:
+                    messages.warning(request, f"Este lugar ya estaba en la ruta '{ruta.titulo}'.")
+
+            except Itinerario.DoesNotExist:
+                messages.error(request, "Hubo un error al encontrar el itinerario.")
+
+    return redirect('detalle_lugar', nombre_lugar=nombre_lugar)
+
+# 23. Mostrar los detalles de un itinerario específico.
+@login_required
+def detalle_itinerario(request, itinerario_id):
+
+    try:
+        ruta = Itinerario.objects.using('mongodb').get(id=itinerario_id, usuario_id=request.user.id)
+
+        lugares_db = Lugar.objects.using('mongodb').filter(nombre__in=ruta.paradas)
+
+        paradas_info = []
+        for nombre in ruta.paradas:
+            lugar = next((l for l in lugares_db if l.nombre == nombre), None)
+            if lugar:
+                paradas_info.append(lugar)
+
+        return render(request, 'detalle_itinerario.html', {
+            'ruta': ruta,
+            'paradas_info': paradas_info
+        })
+    except Itinerario.DoesNotExist:
+        messages.error(request, "No se encontró el itinerario.")
+        return redirect('mis_itinerarios')
+
+# 24. Eliminar una parada específica de un itinerario.
+@login_required
+def eliminar_parada(request, itinerario_id, nombre_lugar):
+
+    try:
+        ruta = Itinerario.objects.using('mongodb').get(id=itinerario_id, usuario_id=request.user.id)
+        if nombre_lugar in ruta.paradas:
+            ruta.paradas.remove(nombre_lugar)
+            ruta.save(using='mongodb')
+            messages.info(request, f"'{nombre_lugar}' se ha quitado de la ruta.")
+    except Itinerario.DoesNotExist:
+        pass
+
+    return redirect('detalle_itinerario', itinerario_id=itinerario_id)
+
+# 25. Eliminar un itinerario completo, asegurando que solo el usuario que creó el itinerario pueda eliminarlo y que se elimine de forma permanente de la base de datos.
+@login_required
+def eliminar_itinerario(request, itinerario_id):
+
+    try:
+        ruta = Itinerario.objects.using('mongodb').get(id=itinerario_id, usuario_id=request.user.id)
+        titulo = ruta.titulo
+        ruta.delete(using='mongodb')
+        messages.info(request, f"El itinerario '{titulo}' ha sido eliminado para siempre.")
+    except Itinerario.DoesNotExist:
+        pass
+
+    return redirect('mis_itinerarios')
+
+# 26. Permitir al usuario mover una parada hacia arriba o hacia abajo dentro de su itinerario.
+@login_required
+def mover_parada(request, itinerario_id, nombre_lugar, direccion):
+
+    try:
+        ruta = Itinerario.objects.using('mongodb').get(id=itinerario_id, usuario_id=request.user.id)
+        paradas = ruta.paradas
+
+        if nombre_lugar in paradas:
+            idx = paradas.index(nombre_lugar)
+
+            if direccion == 'up' and idx > 0:
+                paradas[idx], paradas[idx - 1] = paradas[idx - 1], paradas[idx]
+                ruta.paradas = paradas
+                ruta.save(using='mongodb')
+
+            elif direccion == 'down' and idx < len(paradas) - 1:
+                paradas[idx], paradas[idx + 1] = paradas[idx + 1], paradas[idx]
+                ruta.paradas = paradas
+                ruta.save(using='mongodb')
+
+    except Itinerario.DoesNotExist:
+        messages.error(request, "Error al modificar la ruta.")
+
+    return redirect('detalle_itinerario', itinerario_id=itinerario_id)

@@ -139,3 +139,17 @@ class Favorito(models.Model):
     class Meta:
         managed = False
         db_table = 'favoritos'
+
+# Modelo para representar los itinerarios personalizados creados por los usuarios, almacenados en MongoDB.
+class Itinerario(models.Model):
+
+    id = models.CharField(primary_key=True, max_length=100, default=uuid.uuid4, editable=False)
+    usuario_id = models.IntegerField()
+    titulo = models.CharField(max_length=200)
+
+    paradas = models.JSONField(default=list)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        managed = False
+        db_table = 'itinerarios'

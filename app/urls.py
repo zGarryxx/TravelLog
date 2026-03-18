@@ -22,4 +22,11 @@ urlpatterns = [
     path('guardar-resena/<str:nombre_lugar>/', views.guardar_resena, name='guardar_resena'),
     path('borrar-resena/<str:nombre_lugar>/', views.borrar_resena, name='borrar_resena'),
     path('toggle-favorito/<str:nombre_lugar>/', views.toggle_favorito, name='toggle_favorito'),
+    path('mis-rutas/', views.mis_itinerarios, name='mis_itinerarios'),
+    path('crear-ruta/', views.crear_itinerario, name='crear_itinerario'),
+    path('agregar-parada/<str:nombre_lugar>/', views.agregar_parada, name='agregar_parada'),
+    path('rutas/<str:itinerario_id>/', views.detalle_itinerario, name='detalle_itinerario'),
+    path('rutas/<str:itinerario_id>/quitar/<str:nombre_lugar>/', views.eliminar_parada, name='eliminar_parada'),
+    path('rutas/eliminar/<str:itinerario_id>/', views.eliminar_itinerario, name='eliminar_itinerario'),
+    path('rutas/<str:itinerario_id>/mover/<str:nombre_lugar>/<str:direccion>/', views.mover_parada, name='mover_parada'),
 ]
