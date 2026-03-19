@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db.models import Avg, Count
 from .forms import RegistroForm, LoginForm, RegionForm, LugarForm, ImportarArchivoForm
 from .models import Region, Lugar, Resena, Favorito, Itinerario
 import json
@@ -569,3 +570,63 @@ def mover_parada(request, itinerario_id, nombre_lugar, direccion):
         messages.error(request, "Error al modificar la ruta.")
 
     return redirect('detalle_itinerario', itinerario_id=itinerario_id)
+
+# 27. Mostrar estadísticas globales sobre los lugares, como el número total de valoraciones, los lugares mejor valorados, el promedio de puntuación por categoría y las rutas más populares basadas en las paradas más comunes.
+@login_required
+def estadisticas_globales(request):
+
+    total_rutas_creadas = Itinerario.objects.using('mongodb').count()
+    total_valoraciones = Resena.objects.using('mongodb').count()
+    usuarios_unicos = len(set(Resena.objects.using('mongodb').values_list('usuario_id', flat=True)))
+
+    mejores_lugares = Resena.objects.using('mongodb').values('lugar_nombre').annotate(
+        puntuacion_media=Avg('puntuacion'),
+        total_votos=Count('id')
+    ).order_by('-puntuacion_media')[:5]
+
+    lugares = Lugar.objects.using('mongodb').all()
+    mapa_categorias = {lugar.nombre: lugar.tipo for lugar in lugares}
+    resenas = Resena.objects.using('mongodb').all()
+    stats_categorias = {}
+
+    for resena in resenas:
+        categoria = mapa_categorias.get(resena.lugar_nombre, 'Otros')
+        if categoria not in stats_categorias:
+            stats_categorias[categoria] = {'suma': 0, 'conteo': 0}
+        stats_categorias[categoria]['suma'] += resena.puntuacion
+        stats_categorias[categoria]['conteo'] += 1
+
+    promedio_categorias = []
+    for cat, data in stats_categorias.items():
+        promedio = data['suma'] / data['conteo']
+        porcentaje_entero = int((promedio / 5.0) * 100)
+
+        promedio_categorias.append({
+            'categoria': cat,
+            'promedio': round(promedio, 1),
+            'porcentaje': porcentaje_entero
+        })
+
+    promedio_categorias = sorted(promedio_categorias, key=lambda x: x['promedio'], reverse=True)
+
+    rutas = Itinerario.objects.using('mongodb').all()
+    conteo_paradas = {}
+    for ruta in rutas:
+        for parada in ruta.paradas:
+            if parada in conteo_paradas:
+                conteo_paradas[parada] += 1
+            else:
+                conteo_paradas[parada] = 1
+
+    top_rutas_raw = sorted(conteo_paradas.items(), key=lambda item: item[1], reverse=True)[:10]
+
+    top_rutas = [{'nombre': k, 'cantidad': v} for k, v in top_rutas_raw]
+
+    return render(request, 'estadisticas.html', {
+        'total_rutas_creadas': total_rutas_creadas,
+        'total_valoraciones': total_valoraciones,
+        'usuarios_unicos': usuarios_unicos,
+        'mejores_lugares': mejores_lugares,
+        'promedio_categorias': promedio_categorias,
+        'top_rutas': top_rutas
+    })

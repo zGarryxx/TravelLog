@@ -39,21 +39,32 @@
 
         <div class="row g-4">
             {% if user.rol == 'viajero' or user.is_superuser %}
-            <div class="col-md-6">
-                <div class="card p-4 h-100 border-start border-4 border-success">
-                    <div class="card-body">
+            <div class="col-md-4">
+                <div class="card p-4 h-100 border-start border-4 border-success shadow-sm transition-hover">
+                    <div class="card-body d-flex flex-column">
                         <h4 class="card-title fw-bold">🌍 Explorar Destinos</h4>
-                        <p class="card-text text-muted">Descubre nuevos lugares, monumentos y añade tus valoraciones.</p>
-                        <a href="{% url 'explorar_destinos' %}" class="btn btn-explorer mt-2">Ver Catálogo</a>
+                        <p class="card-text text-muted flex-grow-1">Descubre nuevos lugares, monumentos y añade tus valoraciones.</p>
+                        <a href="{% url 'explorar_destinos' %}" class="btn btn-explorer mt-auto rounded-pill fw-bold px-4">Ver Catálogo</a>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="card p-4 h-100 border-start border-4 border-info">
-                    <div class="card-body">
+
+            <div class="col-md-4">
+                <div class="card p-4 h-100 border-start border-4 border-info shadow-sm transition-hover">
+                    <div class="card-body d-flex flex-column">
                         <h4 class="card-title fw-bold">🗺️ Mis Itinerarios</h4>
-                        <p class="card-text text-muted">Consulta y crea tus rutas de viaje personalizadas.</p>
-                        <a href="{% url 'mis_itinerarios' %}" class="btn btn-outline-info mt-2 rounded-pill fw-bold px-4">Gestionar Rutas</a>
+                        <p class="card-text text-muted flex-grow-1">Consulta y crea tus rutas de viaje personalizadas.</p>
+                        <a href="{% url 'mis_itinerarios' %}" class="btn btn-outline-info mt-auto rounded-pill fw-bold px-4">Gestionar Rutas</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card p-4 h-100 border-start border-4 border-primary shadow-sm transition-hover">
+                    <div class="card-body d-flex flex-column">
+                        <h4 class="card-title fw-bold">📊 Estadísticas Globales</h4>
+                        <p class="card-text text-muted flex-grow-1">Explora las tendencias y los lugares favoritos de la comunidad.</p>
+                        <a href="{% url 'estadisticas' %}" class="btn btn-outline-primary mt-auto rounded-pill fw-bold px-4">Ver Panel</a>
                     </div>
                 </div>
             </div>

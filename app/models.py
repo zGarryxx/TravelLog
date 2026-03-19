@@ -97,19 +97,6 @@ class Valoracion(models.Model):
         managed = False
 
 
-# Modelo para representar los itinerarios personalizados creados por los usuarios, almacenados en MongoDB. Incluye campos para el usuario, título del itinerario, paradas (lugares ordenados) y el ID del usuario.
-class Itinerario(models.Model):
-
-    user = models.CharField(max_length=100)
-    titulo = models.CharField(max_length=200)
-    paradas = models.JSONField()
-    user_id = models.IntegerField(null=True, blank=True)
-
-    class Meta:
-
-        db_table = 'itinerarios'
-        managed = False
-
 # Modelo para representar las reseñas de los lugares turísticos, almacenados en MongoDB. Incluye campos para el ID del usuario, nombre del usuario, nombre del lugar, puntuación, comentario y fecha.
 class Resena(models.Model):
 
@@ -128,6 +115,7 @@ class Resena(models.Model):
         managed = False
         db_table = 'resenas'
 
+
 # Modelo para representar los lugares turísticos favoritos de los usuarios, almacenados en MongoDB. Incluye campos para el ID del usuario, nombre del lugar y fecha de agregado.
 class Favorito(models.Model):
 
@@ -139,6 +127,7 @@ class Favorito(models.Model):
     class Meta:
         managed = False
         db_table = 'favoritos'
+
 
 # Modelo para representar los itinerarios personalizados creados por los usuarios, almacenados en MongoDB.
 class Itinerario(models.Model):

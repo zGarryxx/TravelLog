@@ -29,4 +29,5 @@ urlpatterns = [
     path('rutas/<str:itinerario_id>/quitar/<str:nombre_lugar>/', views.eliminar_parada, name='eliminar_parada'),
     path('rutas/eliminar/<str:itinerario_id>/', views.eliminar_itinerario, name='eliminar_itinerario'),
     path('rutas/<str:itinerario_id>/mover/<str:nombre_lugar>/<str:direccion>/', views.mover_parada, name='mover_parada'),
+    path('estadisticas/', views.estadisticas_globales, name='estadisticas'),
 ]

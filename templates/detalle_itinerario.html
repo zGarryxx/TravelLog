@@ -274,7 +274,11 @@
 
             async function dibujarRuta() {
                 let latlngs = [];
-                for (let parada of paradas) {
+
+                for (let i = 0; i < paradas.length; i++) {
+                    let parada = paradas[i];
+                    let numeroParada = i + 1;
+
                     try {
                         let response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(parada.ciudad)}`);
                         let data = await response.json();
@@ -282,11 +286,21 @@
                         if (data && data.length > 0) {
                             let punto = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
                             latlngs.push(punto);
-                            L.marker(punto).addTo(map).bindPopup(`<b>${parada.nombre}</b><br>${parada.ciudad}`);
+
+                            let customIcon = L.divIcon({
+                                className: 'custom-numbered-marker',
+                                html: `<div style="background-color: #6366f1; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; border: 3px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">${numeroParada}</div>`,
+                                iconSize: [32, 32],
+                                iconAnchor: [16, 16],
+                                popupAnchor: [0, -16]
+                            });
+
+                            L.marker(punto, {icon: customIcon}).addTo(map).bindPopup(`<b>Parada #${numeroParada}</b><br>${parada.nombre}`);
                         }
                     } catch (error) {
                         console.error("No se pudo ubicar:", parada.ciudad);
                     }
+
                     await new Promise(resolve => setTimeout(resolve, 1100));
                 }
 
