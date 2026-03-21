@@ -30,4 +30,9 @@ urlpatterns = [
     path('rutas/eliminar/<str:itinerario_id>/', views.eliminar_itinerario, name='eliminar_itinerario'),
     path('rutas/<str:itinerario_id>/mover/<str:nombre_lugar>/<str:direccion>/', views.mover_parada, name='mover_parada'),
     path('estadisticas/', views.estadisticas_globales, name='estadisticas'),
+    path('panel-admin/', views.panel_administracion, name='panel_admin'),
+    path('panel-admin/usuario/<int:user_id>/banear/', views.banear_usuario, name='banear_usuario'),
+    path('panel-admin/usuario/<int:user_id>/eliminar/', views.eliminar_usuario, name='eliminar_usuario'),
+    path('panel-admin/resena/<str:resena_id>/eliminar/', views.eliminar_resena_admin, name='eliminar_resena_admin'),
+    path('panel-admin/usuario/<int:user_id>/desbanear/', views.desbanear_usuario, name='desbanear_usuario'),
 ]

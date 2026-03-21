@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuenta Suspendida | TravelLog</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        body {
+            margin: 0; padding: 0; min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            background-color: #1e293b; font-family: system-ui, -apple-system, sans-serif;
+        }
+        .banned-bg {
+            background: linear-gradient(-45deg, #ff416c, #ff4b2b, #f59e0b, #ec4899);
+            background-size: 400% 400%; animation: gradientBG 15s ease infinite;
+            border-radius: 30px; padding: 2rem; width: 100%; max-width: 800px;
+            box-shadow: 0 20px 50px rgba(255, 65, 108, 0.3); margin: 20px;
+        }
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 24px; padding: 4rem 3rem;
+            text-align: center; color: white; box-shadow: 0 25px 45px rgba(0, 0, 0, 0.2);
+        }
+        .countdown-container { display: flex; justify-content: center; gap: 1.5rem; margin: 3rem 0; flex-wrap: wrap; }
+        .time-box {
+            background: rgba(0, 0, 0, 0.2); border-radius: 16px; padding: 1.5rem 1rem;
+            min-width: 100px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.05);
+        }
+        .time-box span { display: block; font-size: 3.5rem; font-weight: 900; line-height: 1; text-shadow: 2px 4px 10px rgba(0,0,0,0.3); }
+        .time-box p {
+            font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; opacity: 0.8; font-weight: 600;
+            margin: 0.5rem 0 0;
+        }
+        .icon-banned { font-size: 5rem; color: white; text-shadow: 0 0 20px rgba(255,255,255,0.5); margin-bottom: 1rem; display: inline-block; }
+    </style>
+</head>
+<body>
+
+    <div class="banned-bg animate__animated animate__zoomIn">
+        <div class="glass-card">
+            <i class="bi bi-shield-lock-fill icon-banned animate__animated animate__pulse animate__infinite"></i>
+            <h1 class="fw-bolder display-5 mb-3 text-white">Cuenta Suspendida</h1>
+
+            <p class="fs-5 opacity-75 mb-4">
+                Lo sentimos <strong>{{ nombre }}</strong>, tu cuenta ha sido restringida por incumplir las normas de la comunidad.
+                {% if nivel_castigo == 1 %}(Aviso 1 de 3){% elif nivel_castigo == 2 %}(Aviso 2 de 3){% endif %}
+            </p>
+
+            {% if es_permanente %}
+                <div class="alert alert-danger border-0 bg-danger bg-opacity-25 text-white rounded-4 p-4 mt-4 mb-5 shadow-sm">
+                    <i class="bi bi-exclamation-triangle-fill fs-3 d-block mb-2"></i>
+                    <h4 class="fw-bold">Suspensión Definitiva</h4>
+                    <p class="mb-0 text-white opacity-75">Esta cuenta ha sido bloqueada de forma permanente y no podrá volver a acceder a la plataforma.</p>
+                </div>
+            {% else %}
+                <p class="fw-bold text-uppercase opacity-75 mb-0" style="letter-spacing: 3px;">Tiempo restante de penalización:</p>
+                <div class="countdown-container" id="countdown">
+                    <div class="time-box"><span id="days">00</span><p>Días</p></div>
+                    <div class="time-box"><span id="hours">00</span><p>Horas</p></div>
+                    <div class="time-box"><span id="minutes">00</span><p>Minutos</p></div>
+                    <div class="time-box"><span id="seconds">00</span><p>Segundos</p></div>
+                </div>
+                <div id="unlock-msg" class="d-none">
+                    <div class="alert alert-success border-0 bg-success bg-opacity-25 text-white rounded-pill py-3 px-4 mb-4">
+                        <i class="bi bi-check-circle-fill me-2"></i> ¡Tu castigo ha terminado! Ya puedes volver a entrar.
+                    </div>
+                </div>
+            {% endif %}
+
+            <a href="{% url 'login' %}" class="btn btn-light rounded-pill px-5 py-3 fw-bold text-danger mt-3 shadow-lg">
+                <i class="bi bi-arrow-left me-2"></i> Volver al Inicio
+            </a>
+        </div>
+    </div>
+
+{% if not es_permanente %}
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const bannedUntilStr = "{{ banned_until }}";
+        if (!bannedUntilStr) return;
+
+        const countDownDate = new Date(bannedUntilStr).getTime();
+        const x = setInterval(function() {
+            const now = new Date().getTime();
+            const distance = countDownDate - now;
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById("days").innerText = days.toString().padStart(2, '0');
+            document.getElementById("hours").innerText = hours.toString().padStart(2, '0');
+            document.getElementById("minutes").innerText = minutes.toString().padStart(2, '0');
+            document.getElementById("seconds").innerText = seconds.toString().padStart(2, '0');
+
+            if (distance < 0) {
+                clearInterval(x);
+                document.getElementById("countdown").classList.add("d-none");
+                document.getElementById("unlock-msg").classList.remove("d-none");
+            }
+        }, 1000);
+    });
+
+</script>
+{% endif %}
+</body>
+</html>

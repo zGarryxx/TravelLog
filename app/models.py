@@ -40,6 +40,9 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
 
     objects = UsuarioManager()
 
+    ban_count = models.IntegerField(default=0)
+    banned_until = models.DateTimeField(null=True, blank=True)
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['nombre']
 
@@ -100,14 +103,12 @@ class Valoracion(models.Model):
 # Modelo para representar las reseñas de los lugares turísticos, almacenados en MongoDB. Incluye campos para el ID del usuario, nombre del usuario, nombre del lugar, puntuación, comentario y fecha.
 class Resena(models.Model):
 
-    id = models.CharField(primary_key=True, max_length=24, editable=False)
+    id = models.CharField(db_column='_id', primary_key=True, max_length=24, editable=False)
+
     usuario_id = models.IntegerField()
     usuario_nombre = models.CharField(max_length=100)
     lugar_nombre = models.CharField(max_length=200)
-
-    puntuacion = models.IntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(5)]
-    )
+    puntuacion = models.IntegerField()
     comentario = models.TextField(blank=True, null=True)
     fecha = models.DateTimeField(auto_now_add=True)
 

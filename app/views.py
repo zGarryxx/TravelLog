@@ -1,8 +1,13 @@
+from bson import ObjectId
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.db.models import Avg, Count
+from django.utils import timezone
+from datetime import timedelta
+from django.shortcuts import get_object_or_404
+from django.contrib import messages
 from .forms import RegistroForm, LoginForm, RegionForm, LugarForm, ImportarArchivoForm
 from .models import Region, Lugar, Resena, Favorito, Itinerario
 import json
@@ -44,18 +49,48 @@ def registrar_usuario(request):
 def login_usuario(request):
 
     if request.method == 'POST':
+        email_ingresado = request.POST.get('username')
+        Usuario = get_user_model()
+
+        try:
+            usuario_check = Usuario.objects.get(email=email_ingresado)
+            if not usuario_check.is_active and usuario_check.banned_until:
+                if timezone.now() > usuario_check.banned_until:
+                    usuario_check.is_active = True
+                    usuario_check.banned_until = None
+                    usuario_check.save()
+        except Usuario.DoesNotExist:
+            pass
+
         form = LoginForm(request, data=request.POST)
         if form.is_valid():
             email = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
             usuario = authenticate(request, email=email, password=password)
+
             if usuario is not None:
                 login(request, usuario)
                 messages.success(request, f'¡Bienvenido de nuevo al campamento, {usuario.nombre}!')
                 return redirect('home')
-        messages.error(request, 'Credenciales incorrectas. ¿Has olvidado tu mapa?')
+
+        try:
+            usuario_fallido = Usuario.objects.get(email=email_ingresado)
+            if not usuario_fallido.is_active:
+                context = {
+                    'nombre': usuario_fallido.nombre,
+                    'banned_until': usuario_fallido.banned_until.isoformat() if usuario_fallido.banned_until else None,
+                    'es_permanente': usuario_fallido.banned_until is None,
+                    'nivel_castigo': usuario_fallido.ban_count
+                }
+                return render(request, 'banned.html', context)
+            else:
+                messages.error(request, 'Credenciales incorrectas. ¿Has olvidado tu mapa?')
+        except Usuario.DoesNotExist:
+            messages.error(request, 'Credenciales incorrectas. ¿Has olvidado tu mapa?')
+
     else:
         form = LoginForm()
+
     return render(request, 'login.html', {'form': form})
 
 # 4. Logout
@@ -386,25 +421,28 @@ def guardar_resena(request, nombre_lugar):
         puntuacion = request.POST.get('puntuacion')
         comentario = request.POST.get('comentario')
 
-        existe = Resena.objects.using('mongodb').filter(
+        resena_existente = Resena.objects.using('mongodb').filter(
             usuario_id=request.user.id,
             lugar_nombre=nombre_lugar
-        ).exists()
+        ).first()
 
-        resena, created = Resena.objects.using('mongodb').update_or_create(
-            usuario_id=request.user.id,
-            lugar_nombre=nombre_lugar,
-            defaults={
-                'usuario_nombre': request.user.nombre,
-                'puntuacion': int(puntuacion),
-                'comentario': comentario,
-            }
-        )
-
-        if existe:
-            messages.success(request, "¡Reseña actualizada correctamente!")
+        if resena_existente:
+            resena_existente.puntuacion = int(puntuacion)
+            resena_existente.comentario = comentario
+            resena_existente.save(using='mongodb')
+            messages.success(request, "¡Reseña actualizada!")
         else:
-            messages.success(request, "¡Tu reseña ha sido publicada con éxito!")
+            nuevo_id_manual = str(ObjectId())
+
+            Resena.objects.using('mongodb').create(
+                id=nuevo_id_manual,
+                usuario_id=request.user.id,
+                usuario_nombre=request.user.nombre,
+                lugar_nombre=nombre_lugar,
+                puntuacion=int(puntuacion),
+                comentario=comentario
+            )
+            messages.success(request, "¡Reseña publicada con éxito!")
 
     return redirect('detalle_lugar', nombre_lugar=nombre_lugar)
 
@@ -630,3 +668,125 @@ def estadisticas_globales(request):
         'promedio_categorias': promedio_categorias,
         'top_rutas': top_rutas
     })
+
+# 28. Panel de administración para gestionar usuarios, revisar reseñas recientes y mostrar estadísticas globales, asegurando que solo los usuarios con rol de administrador puedan acceder a esta sección.
+@login_required(login_url='login')
+def panel_administracion(request):
+
+    if request.user.rol != 'admin' and not request.user.is_superuser:
+        messages.error(request, 'Acceso denegado.')
+        return redirect('home')
+
+    Usuario = get_user_model()
+    usuarios = Usuario.objects.all().order_by('-id')
+    resenas_recientes_crudas = Resena.objects.using('mongodb').all().order_by('-fecha')[:10]
+
+    resenas_recientes = []
+    for r in resenas_recientes_crudas:
+        mongo_id = str(r.pk)
+        resenas_recientes.append({
+            'safe_id': mongo_id,
+            'lugar_nombre': r.lugar_nombre,
+            'usuario_nombre': r.usuario_nombre,
+            'puntuacion': r.puntuacion,
+            'fecha': r.fecha,
+        })
+
+    return render(request, 'admin_panel.html', {
+        'usuarios': usuarios,
+        'resenas_recientes': resenas_recientes,
+        'total_usuarios': usuarios.count(),
+        'total_lugares': Lugar.objects.using('mongodb').count(),
+        'total_rutas': Itinerario.objects.using('mongodb').count(),
+        'total_resenas': Resena.objects.using('mongodb').count(),
+    })
+
+# 29. Banear a un usuario por un período determinado (15 días para el primer baneo, 30 días para el segundo baneo y permanente para el tercer baneo), asegurando que solo los administradores puedan realizar esta acción y que no se puedan banear otros administradores.
+@login_required(login_url='login')
+def banear_usuario(request, user_id):
+
+    if request.method == 'POST':
+        if request.user.rol != 'admin' and not request.user.is_superuser:
+            return redirect('home')
+
+        Usuario = get_user_model()
+        usuario_target = get_object_or_404(Usuario, id=user_id)
+
+        if usuario_target.is_superuser or usuario_target.rol == 'admin':
+            messages.error(request, "Error: No tienes permisos para banear a un administrador.")
+            return redirect('panel_admin')
+
+        tipo_baneo = request.POST.get('tipo_baneo')
+
+        if tipo_baneo == '15':
+            usuario_target.ban_count += 1
+            usuario_target.is_active = False
+            usuario_target.banned_until = timezone.now() + timedelta(days=15)
+            messages.warning(request, f"Se ha aplicado una suspensión de 15 días a {usuario_target.nombre}.")
+
+        elif tipo_baneo == '30':
+            usuario_target.ban_count += 1
+            usuario_target.is_active = False
+            usuario_target.banned_until = timezone.now() + timedelta(days=30)
+            messages.warning(request, f"Se ha aplicado una suspensión de 30 días a {usuario_target.nombre}.")
+
+        elif tipo_baneo == 'perma':
+            usuario_target.ban_count += 1
+            usuario_target.is_active = False
+            usuario_target.banned_until = None
+            messages.info(request, f"La cuenta de {usuario_target.nombre} ha sido suspendida PERMANENTEMENTE.")
+
+        usuario_target.save()
+
+    return redirect('panel_admin')
+
+# 30. Desbanear a un usuario, asegurando que solo los administradores puedan realizar esta acción y que se restablezca el acceso total a la cuenta del usuario.
+@login_required(login_url='login')
+def desbanear_usuario(request, user_id):
+
+    if request.user.rol != 'admin' and not request.user.is_superuser:
+        return redirect('home')
+
+    Usuario = get_user_model()
+    usuario_target = get_object_or_404(Usuario, id=user_id)
+
+    usuario_target.is_active = True
+    usuario_target.banned_until = None
+    usuario_target.ban_count = 0
+    usuario_target.save()
+
+    messages.info(request, f"La cuenta de {usuario_target.nombre} ha sido restaurada. Vuelve a tener acceso total.")
+
+    return redirect('panel_admin')
+
+# 31. Eliminar un usuario de forma permanente, asegurando que solo los administradores puedan realizar esta acción y que no se puedan eliminar otros administradores.
+@login_required(login_url='login')
+def eliminar_usuario(request, user_id):
+
+    if request.user.rol != 'admin' and not request.user.is_superuser:
+        return redirect('home')
+
+    Usuario = get_user_model()
+    usuario_target = get_object_or_404(Usuario, id=user_id)
+
+    if not usuario_target.is_superuser and usuario_target.rol != 'admin':
+        usuario_target.delete()
+        messages.info(request, f"La cuenta de {usuario_target.nombre} ha sido eliminada de la base de datos.")
+
+    return redirect('panel_admin')
+
+# 32. Eliminar una reseña de forma permanente, asegurando que solo los administradores puedan realizar esta acción y que se elimine de forma permanente de la base de datos.
+@login_required(login_url='login')
+def eliminar_resena_admin(request, resena_id):
+
+    if request.user.rol != 'admin' and not request.user.is_superuser:
+        return redirect('home')
+
+    try:
+        Resena.objects.using('mongodb').filter(id=resena_id).delete()
+
+        messages.info(request, "Reseña eliminada correctamente de la plataforma.")
+    except Exception as e:
+        messages.error(request, f"Error al eliminar la reseña: {e}")
+
+    return redirect('panel_admin')

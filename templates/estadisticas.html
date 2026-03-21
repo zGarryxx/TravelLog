@@ -2,69 +2,80 @@
 
 {% block content %}
 <style>
-    body { background-color: #f0f4f8; }
+    body { background-color: #f4f7f6; }
 
     .header-dashboard {
-        background: #0f172a; border-radius: 28px; padding: 4rem 3rem;
-        color: white; margin-bottom: 3rem; position: relative;
-        overflow: hidden; box-shadow: 0 20px 40px rgba(15, 23, 42, 0.15);
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        border-radius: 24px; padding: 4rem 3rem; color: white;
+        margin-bottom: 2rem; position: relative; overflow: hidden;
+        box-shadow: 0 15px 35px rgba(15, 23, 42, 0.15);
     }
     .blob {
-        position: absolute; filter: blur(60px); opacity: 0.6;
+        position: absolute; filter: blur(60px); opacity: 0.5;
         border-radius: 50%; animation: float 8s infinite alternate ease-in-out;
     }
-    .blob-1 { top: -50px; left: -50px; width: 300px; height: 300px; background: #6366f1; }
-    .blob-2 { bottom: -100px; right: 10%; width: 400px; height: 400px; background: #ec4899; animation-delay: -4s; }
-    .blob-3 { top: 20%; right: -50px; width: 200px; height: 200px; background: #3b82f6; }
+    .blob-1 { top: -50px; left: -50px; width: 300px; height: 300px; background: #3b82f6; }
+    .blob-2 { bottom: -100px; right: 5%; width: 350px; height: 350px; background: #ec4899; animation-delay: -3s; }
+    .blob-3 { top: 10%; right: 30%; width: 200px; height: 200px; background: #8b5cf6; animation-delay: -5s; }
 
     @keyframes float {
         0% { transform: translateY(0) scale(1); }
         100% { transform: translateY(-20px) scale(1.05); }
     }
 
+    .kpi-card {
+        background: white; border: none; border-radius: 20px;
+        padding: 1.5rem 2rem; display: flex; align-items: center; justify-content: space-between;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.04); transition: transform 0.3s ease;
+        border-bottom: 4px solid transparent;
+    }
+    .kpi-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.08); }
+    .kpi-reviews { border-bottom-color: #ec4899; }
+    .kpi-routes { border-bottom-color: #0ea5e9; }
+    .kpi-users { border-bottom-color: #f59e0b; }
+
+    .kpi-icon-box {
+        width: 60px; height: 60px; border-radius: 16px; display: flex;
+        align-items: center; justify-content: center; font-size: 1.8rem;
+    }
+    .stat-number { font-size: 3rem; font-weight: 900; line-height: 1; color: #1e293b; letter-spacing: -1px; }
+
     .premium-card {
-        background: white; border: none; border-radius: 28px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.03); padding: 2.5rem;
-        height: 100%; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        background: white; border: none; border-radius: 24px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.03); padding: 2rem;
+        height: 100%; transition: all 0.3s ease;
     }
-    .premium-card:hover { transform: translateY(-8px); box-shadow: 0 20px 50px rgba(0,0,0,0.08); }
+    .premium-card:hover { box-shadow: 0 15px 40px rgba(0,0,0,0.06); }
 
-    .hero-stat-card {
-        background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
-        color: white; padding: 3rem; border-radius: 28px;
-        display: flex; justify-content: space-between; align-items: center;
-        box-shadow: 0 20px 40px rgba(168, 85, 247, 0.3); position: relative; overflow: hidden;
+    .ranking-row {
+        background-color: #ffffff; border: 1px solid #f1f5f9;
+        transition: all 0.2s ease; border-radius: 16px; margin-bottom: 0.8rem;
     }
-    .stat-number { font-size: 5.5rem; font-weight: 900; line-height: 1; text-shadow: 2px 4px 15px rgba(0,0,0,0.2); }
-
-    .ranking-row { background-color: #ffffff; border: 1px solid #f1f5f9; transition: all 0.3s ease; }
-    .ranking-row:hover { background-color: #f8fafc; transform: scale(1.02); box-shadow: 0 10px 25px rgba(0,0,0,0.05); border-color: transparent; }
+    .ranking-row:hover {
+        background-color: #f8fafc; transform: translateX(5px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.03); border-color: #e2e8f0;
+    }
 
     .rank-badge {
         display: flex; align-items: center; justify-content: center;
-        font-weight: 800; border-radius: 14px; flex-shrink: 0; color: white;
+        font-weight: 800; border-radius: 12px; flex-shrink: 0; color: white;
     }
-    .rank-1 { background: linear-gradient(135deg, #f59e0b, #fbbf24); box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3); }
-    .rank-2 { background: linear-gradient(135deg, #94a3b8, #cbd5e1); box-shadow: 0 8px 20px rgba(148, 163, 184, 0.3); }
-    .rank-3 { background: linear-gradient(135deg, #b45309, #d97706); box-shadow: 0 8px 20px rgba(180, 83, 9, 0.3); }
+    .rank-1 { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); box-shadow: 0 4px 10px rgba(253, 160, 133, 0.4); }
+    .rank-2 { background: linear-gradient(135deg, #e2ebf0 0%, #cfd9df 100%); color: #475569; box-shadow: 0 4px 10px rgba(207, 217, 223, 0.4); }
+    .rank-3 { background: linear-gradient(135deg, #f6d365 0%, #d4823c 100%); box-shadow: 0 4px 10px rgba(212, 130, 60, 0.4); }
     .rank-other { background: #f1f5f9; color: #64748b; }
 
-    .cat-progress-bg { height: 14px; background-color: #f1f5f9; border-radius: 50rem; overflow: hidden; }
-    .cat-progress-fill { height: 100%; border-radius: 50rem; transition: width 1.5s ease; }
+    .cat-progress-bg { height: 12px; background-color: #f1f5f9; border-radius: 50rem; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05); }
+    .cat-progress-fill { height: 100%; border-radius: 50rem; transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
+    .grad-1 { background: linear-gradient(90deg, #3b82f6 0%, #2dd4bf 100%); box-shadow: 0 0 10px rgba(45, 212, 191, 0.5); }
+    .grad-2 { background: linear-gradient(90deg, #f43f5e 0%, #f59e0b 100%); box-shadow: 0 0 10px rgba(245, 158, 11, 0.5); }
+    .grad-3 { background: linear-gradient(90deg, #8b5cf6 0%, #d946ef 100%); box-shadow: 0 0 10px rgba(217, 70, 239, 0.5); }
+    .grad-4 { background: linear-gradient(90deg, #10b981 0%, #3b82f6 100%); box-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
+    .grad-5 { background: linear-gradient(90deg, #f59e0b 0%, #10b981 100%); box-shadow: 0 0 10px rgba(245, 158, 11, 0.5); }
 
-    .grad-1 { background: linear-gradient(90deg, #3b82f6 0%, #2dd4bf 100%); }
-    .grad-2 { background: linear-gradient(90deg, #f59e0b 0%, #f43f5e 100%); }
-    .grad-3 { background: linear-gradient(90deg, #10b981 0%, #3b82f6 100%); }
-    .grad-4 { background: linear-gradient(90deg, #ec4899 0%, #8b5cf6 100%); }
-    .grad-5 { background: linear-gradient(90deg, #8b5cf6 0%, #3b82f6 100%); }
-
-    .scrollable-list {
-        max-height: 380px;
-        overflow-y: auto;
-        padding-right: 0.5rem;
-    }
-    .scrollable-list::-webkit-scrollbar { width: 6px; }
-    .scrollable-list::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+    .scrollable-list { max-height: 400px; overflow-y: auto; padding-right: 0.5rem; }
+    .scrollable-list::-webkit-scrollbar { width: 5px; }
+    .scrollable-list::-webkit-scrollbar-track { background: transparent; }
     .scrollable-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     .scrollable-list::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
@@ -73,45 +84,54 @@
 <div class="container py-5">
 
     <div class="header-dashboard animate__animated animate__fadeInDown">
-        <div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div>
-        <div class="position-relative z-1">
-            <h1 class="fw-bolder mb-2 display-4">Estadísticas Globales</h1>
-            <p class="text-light opacity-75 mb-0 fs-5">Explora las tendencias de la comunidad viajera.</p>
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+        <div class="position-relative z-1 d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+                <span class="badge bg-white bg-opacity-25 text-white rounded-pill px-3 py-2 mb-3 fw-bold" style="letter-spacing: 1px;"><i class="bi bi-bar-chart-fill me-1"></i> DASHBOARD ANALÍTICO</span>
+                <h1 class="fw-bolder mb-2 display-5">Estadísticas Globales</h1>
+                <p class="text-light opacity-75 mb-0 fs-5">Descubre las tendencias y destinos favoritos de la comunidad.</p>
+            </div>
+            <div class="mt-4 mt-md-0 d-none d-lg-block">
+                <i class="bi bi-globe-americas" style="font-size: 8rem; opacity: 0.15; transform: rotate(15deg);"></i>
+            </div>
         </div>
     </div>
 
-    <div class="row mb-5">
-        <div class="col-12 animate__animated animate__zoomIn">
-            <div class="hero-stat-card">
-                <div class="position-relative z-1 w-100">
-                    <h5 class="text-white opacity-75 fw-bold text-uppercase mb-4" style="letter-spacing: 2px;">Impacto de la Comunidad</h5>
-
-                    <div class="d-flex flex-wrap gap-5">
-                        <div>
-                            <div class="stat-number mb-1 counter">{{ total_valoraciones }}</div>
-                            <p class="fs-5 fw-medium mb-0 opacity-100">
-                                <i class="bi bi-chat-square-heart-fill me-2"></i> Reseñas totales
-                            </p>
-                        </div>
-
-                        <div>
-                            <div class="stat-number mb-1 text-info counter">{{ total_rutas_creadas }}</div>
-                            <p class="fs-5 fw-medium mb-0 opacity-100">
-                                <i class="bi bi-map-fill me-2 text-info"></i> Rutas diseñadas
-                            </p>
-                        </div>
-
-                        <div>
-                            <div class="stat-number mb-1 text-warning counter">{{ usuarios_unicos }}</div>
-                            <p class="fs-5 fw-medium mb-0 opacity-100">
-                                <i class="bi bi-people-fill me-2 text-warning"></i> Usuarios han puntuado
-                            </p>
-                        </div>
-                    </div>
-
+    <div class="row g-4 mb-5 animate__animated animate__fadeInUp">
+        <div class="col-lg-4 col-md-6">
+            <div class="kpi-card kpi-reviews">
+                <div>
+                    <p class="text-muted fw-bold mb-1 text-uppercase" style="font-size: 0.8rem; letter-spacing: 1px;">Reseñas Totales</p>
+                    <div class="stat-number counter">{{ total_valoraciones }}</div>
                 </div>
-                <div class="position-relative z-1 d-none d-md-block">
-                    <i class="bi bi-globe-americas" style="font-size: 8rem; opacity: 0.2; transform: rotate(15deg);"></i>
+                <div class="kpi-icon-box bg-danger bg-opacity-10 text-danger">
+                    <i class="bi bi-chat-square-heart-fill"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+            <div class="kpi-card kpi-routes">
+                <div>
+                    <p class="text-muted fw-bold mb-1 text-uppercase" style="font-size: 0.8rem; letter-spacing: 1px;">Rutas Diseñadas</p>
+                    <div class="stat-number counter">{{ total_rutas_creadas }}</div>
+                </div>
+                <div class="kpi-icon-box bg-info bg-opacity-10 text-info">
+                    <i class="bi bi-map-fill"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-12">
+            <div class="kpi-card kpi-users">
+                <div>
+                    <p class="text-muted fw-bold mb-1 text-uppercase" style="font-size: 0.8rem; letter-spacing: 1px;">Usuarios Activos</p>
+                    <div class="stat-number counter">{{ usuarios_unicos }}</div>
+                </div>
+                <div class="kpi-icon-box bg-warning bg-opacity-10 text-warning">
+                    <i class="bi bi-people-fill"></i>
                 </div>
             </div>
         </div>
@@ -120,73 +140,99 @@
     <div class="row g-4 pb-5">
 
         <div class="col-lg-4 animate__animated animate__fadeInLeft" style="animation-delay: 100ms;">
-            <div class="premium-card p-4">
-                <h5 class="fw-bold text-dark mb-4 pb-2 border-bottom">
-                    <i class="bi bi-star-fill text-warning me-2"></i> Mejor Valorados
-                </h5>
-                <div class="mt-3">
+            <div class="premium-card">
+                <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
+                    <div class="bg-warning bg-opacity-10 p-2 rounded-circle me-3 text-warning">
+                        <i class="bi bi-trophy-fill fs-5"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-0">Mejor Valorados</h5>
+                </div>
+
+                <div class="scrollable-list">
                     {% for lugar in mejores_lugares %}
-                        <div class="ranking-row p-3 mb-3 border rounded-4 d-flex align-items-center">
-                            <div class="rank-badge shadow-sm me-3 {% if forloop.counter == 1 %}rank-1{% elif forloop.counter == 2 %}rank-2{% elif forloop.counter == 3 %}rank-3{% else %}rank-other{% endif %}" style="width: 35px; height: 35px;">
+                        <div class="ranking-row p-3 d-flex align-items-center">
+                            <div class="rank-badge shadow-sm me-3 {% if forloop.counter == 1 %}rank-1{% elif forloop.counter == 2 %}rank-2{% elif forloop.counter == 3 %}rank-3{% else %}rank-other{% endif %}" style="width: 38px; height: 38px; font-size: 1.1rem;">
                                 {{ forloop.counter }}
                             </div>
-                            <div class="flex-grow-1">
-                                <h6 class="fw-bold text-dark mb-1">{{ lugar.lugar_nombre|truncatechars:18 }}</h6>
-                                <small class="text-secondary"><i class="bi bi-people-fill"></i> {{ lugar.total_votos }} usuarios</small>
+                            <div class="flex-grow-1 overflow-hidden">
+                                <h6 class="fw-bold text-dark mb-1 text-truncate" title="{{ lugar.lugar_nombre }}">{{ lugar.lugar_nombre }}</h6>
+                                <div class="d-flex align-items-center text-secondary small">
+                                    <i class="bi bi-people-fill me-1 opacity-50"></i> {{ lugar.total_votos }} votos
+                                </div>
                             </div>
-                            <div class="text-end fw-bolder text-dark fs-5 ms-2">{{ lugar.puntuacion_media|floatformat:1 }}</div>
+                            <div class="text-end ms-2">
+                                <span class="badge bg-dark bg-opacity-10 text-dark rounded-pill px-3 py-2 fs-6 border border-secondary border-opacity-25">
+                                    <i class="bi bi-star-fill text-warning me-1 small"></i>{{ lugar.puntuacion_media|floatformat:1 }}
+                                </span>
+                            </div>
                         </div>
                     {% empty %}
-                        <p class="text-muted text-center py-4 small">Sin valoraciones suficientes.</p>
+                        <div class="text-center py-5">
+                            <i class="bi bi-star text-muted opacity-25" style="font-size: 3rem;"></i>
+                            <p class="text-muted mt-3 small">Sin valoraciones suficientes aún.</p>
+                        </div>
                     {% endfor %}
                 </div>
             </div>
         </div>
 
         <div class="col-lg-4 animate__animated animate__fadeInUp" style="animation-delay: 200ms;">
-            <div class="premium-card p-4">
-                <h5 class="fw-bold text-dark mb-4 pb-2 border-bottom">
-                    <i class="bi bi-signpost-split-fill text-danger me-2"></i> Favoritos en Rutas
-                </h5>
+            <div class="premium-card">
+                <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
+                    <div class="bg-info bg-opacity-10 p-2 rounded-circle me-3 text-info">
+                        <i class="bi bi-signpost-split-fill fs-5"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-0">Top en Itinerarios</h5>
+                </div>
 
-                <div class="mt-3 scrollable-list">
+                <div class="scrollable-list">
                     {% for ruta in top_rutas %}
-                        <div class="ranking-row p-3 mb-3 border rounded-4 d-flex align-items-center">
-                            <div class="flex-grow-1">
-                                <h6 class="fw-bold text-dark mb-1">{{ ruta.nombre|truncatechars:18 }}</h6>
+                        <div class="ranking-row p-3 d-flex align-items-center">
+                            <div class="flex-grow-1 overflow-hidden">
+                                <h6 class="fw-bold text-dark mb-1 text-truncate" title="{{ ruta.nombre }}">{{ ruta.nombre }}</h6>
                             </div>
-                            <div class="text-end">
-                                <span class="badge bg-danger rounded-pill px-3 py-2 shadow-sm">
-                                    <i class="bi bi-pin-map-fill me-1"></i> {{ ruta.cantidad }} rutas
+                            <div class="text-end ms-3">
+                                <span class="badge bg-info text-white rounded-pill px-3 py-2 shadow-sm fw-medium">
+                                    <i class="bi bi-pin-map-fill me-1"></i> {{ ruta.cantidad }}
                                 </span>
                             </div>
                         </div>
                     {% empty %}
-                        <p class="text-muted text-center py-4 small">Ningún usuario ha creado rutas aún.</p>
+                        <div class="text-center py-5">
+                            <i class="bi bi-map text-muted opacity-25" style="font-size: 3rem;"></i>
+                            <p class="text-muted mt-3 small">Ningún usuario ha creado rutas aún.</p>
+                        </div>
                     {% endfor %}
                 </div>
             </div>
         </div>
 
         <div class="col-lg-4 animate__animated animate__fadeInRight" style="animation-delay: 300ms;">
-            <div class="premium-card p-4">
-                <h5 class="fw-bold text-dark mb-4 pb-2 border-bottom">
-                    <i class="bi bi-pie-chart-fill text-primary me-2"></i> Por Categoría
-                </h5>
-                <div class="mt-3">
+            <div class="premium-card">
+                <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
+                    <div class="bg-primary bg-opacity-10 p-2 rounded-circle me-3 text-primary">
+                        <i class="bi bi-pie-chart-fill fs-5"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-0">Por Categoría</h5>
+                </div>
+
+                <div class="scrollable-list mt-2">
                     {% for cat in promedio_categorias %}
-                        <div class="mb-4">
-                            <div class="d-flex justify-content-between align-items-end mb-1">
-                                <span class="fw-bold text-dark small">{{ cat.categoria }}</span>
-                                <span class="fw-bolder text-dark small">{{ cat.promedio }} / 5</span>
+                        <div class="mb-4 pe-2">
+                            <div class="d-flex justify-content-between align-items-end mb-2">
+                                <span class="fw-bold text-secondary text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">{{ cat.categoria }}</span>
+                                <span class="fw-bolder text-dark bg-light px-2 py-1 rounded-2 small border">{{ cat.promedio }} <span class="text-muted">/ 5</span></span>
                             </div>
-                            <div class="cat-progress-bg mt-1" style="height: 10px;">
+                            <div class="cat-progress-bg">
                                 <div class="cat-progress-fill {% cycle 'grad-1' 'grad-2' 'grad-3' 'grad-4' 'grad-5' %}"
-                                     style="width: {{ cat.porcentaje }}%;"></div>
+                                     style="width: 0%;" data-width="{{ cat.porcentaje }}%"></div>
                             </div>
                         </div>
                     {% empty %}
-                        <p class="text-muted text-center py-4 small">Sin datos de categorías.</p>
+                        <div class="text-center py-5">
+                            <i class="bi bi-bar-chart text-muted opacity-25" style="font-size: 3rem;"></i>
+                            <p class="text-muted mt-3 small">Faltan datos de categorías.</p>
+                        </div>
                     {% endfor %}
                 </div>
             </div>
@@ -216,6 +262,12 @@
             };
             setTimeout(updateCounter, 200);
         });
+
+        setTimeout(() => {
+            document.querySelectorAll('.cat-progress-fill').forEach(bar => {
+                bar.style.width = bar.getAttribute('data-width');
+            });
+        }, 300);
     });
 </script>
 

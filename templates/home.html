@@ -1,118 +1,83 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Campamento Base - TravelLog</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .navbar { background-color: #ffffff; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .navbar-brand { font-weight: 700; color: #20c997 !important; }
-        .card { border: none; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: 0.3s; }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        .btn-explorer { background-color: #20c997; color: white; border-radius: 50px; font-weight: 600; padding: 10px 20px; }
-    </style>
-</head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-light mb-4 p-3">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'home' %}">✈️ TravelLog</a>
-            <div class="d-flex align-items-center gap-3">
-                <span class="text-muted">Hola, <strong>{{ user.nombre }}</strong></span>
-                <a href="{% url 'logout' %}" class="btn btn-outline-danger btn-sm rounded-pill px-3">Desconectar</a>
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .card { border: none; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: 0.3s; }
+    .card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+    .btn-explorer { background-color: #20c997; color: white; border-radius: 50px; font-weight: 600; padding: 10px 20px; }
+    .btn-explorer:hover { background-color: #1aa179; color: white; }
+</style>
+
+<div class="container py-4">
+    <h2 class="fw-bold mb-4" style="color: #2c3e50;">Tu Campamento Base</h2>
+
+    <div class="row g-4">
+        {% if user.rol == 'viajero' or user.is_superuser %}
+        <div class="col-md-4">
+            <div class="card p-4 h-100 border-start border-4 border-success shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <h4 class="card-title fw-bold">🌍 Explorar Destinos</h4>
+                    <p class="card-text text-muted flex-grow-1">Descubre nuevos lugares, monumentos y añade tus valoraciones.</p>
+                    <a href="{% url 'explorar_destinos' %}" class="btn btn-explorer mt-auto rounded-pill fw-bold px-4">Ver Catálogo</a>
+                </div>
             </div>
         </div>
-    </nav>
 
-    <div class="container">
-
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div class="col-md-4">
+            <div class="card p-4 h-100 border-start border-4 border-info shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <h4 class="card-title fw-bold">🗺️ Mis Itinerarios</h4>
+                    <p class="card-text text-muted flex-grow-1">Consulta y crea tus rutas de viaje personalizadas.</p>
+                    <a href="{% url 'mis_itinerarios' %}" class="btn btn-outline-info mt-auto rounded-pill fw-bold px-4">Gestionar Rutas</a>
                 </div>
-            {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card p-4 h-100 border-start border-4 border-primary shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <h4 class="card-title fw-bold">📊 Estadísticas Globales</h4>
+                    <p class="card-text text-muted flex-grow-1">Explora las tendencias y los lugares favoritos de la comunidad.</p>
+                    <a href="{% url 'estadisticas' %}" class="btn btn-outline-primary mt-auto rounded-pill fw-bold px-4">Ver Panel</a>
+                </div>
+            </div>
+        </div>
         {% endif %}
 
-        <h2 class="fw-bold mb-4" style="color: #2c3e50;">Tu Campamento Base</h2>
-
-        <div class="row g-4">
-            {% if user.rol == 'viajero' or user.is_superuser %}
-            <div class="col-md-4">
-                <div class="card p-4 h-100 border-start border-4 border-success shadow-sm transition-hover">
-                    <div class="card-body d-flex flex-column">
-                        <h4 class="card-title fw-bold">🌍 Explorar Destinos</h4>
-                        <p class="card-text text-muted flex-grow-1">Descubre nuevos lugares, monumentos y añade tus valoraciones.</p>
-                        <a href="{% url 'explorar_destinos' %}" class="btn btn-explorer mt-auto rounded-pill fw-bold px-4">Ver Catálogo</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card p-4 h-100 border-start border-4 border-info shadow-sm transition-hover">
-                    <div class="card-body d-flex flex-column">
-                        <h4 class="card-title fw-bold">🗺️ Mis Itinerarios</h4>
-                        <p class="card-text text-muted flex-grow-1">Consulta y crea tus rutas de viaje personalizadas.</p>
-                        <a href="{% url 'mis_itinerarios' %}" class="btn btn-outline-info mt-auto rounded-pill fw-bold px-4">Gestionar Rutas</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card p-4 h-100 border-start border-4 border-primary shadow-sm transition-hover">
-                    <div class="card-body d-flex flex-column">
-                        <h4 class="card-title fw-bold">📊 Estadísticas Globales</h4>
-                        <p class="card-text text-muted flex-grow-1">Explora las tendencias y los lugares favoritos de la comunidad.</p>
-                        <a href="{% url 'estadisticas' %}" class="btn btn-outline-primary mt-auto rounded-pill fw-bold px-4">Ver Panel</a>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-
-            {% if user.rol == 'admin' or user.is_superuser %}
-            <div class="col-12 mt-5">
-                <h3 class="fw-bold text-danger mb-3">🛠️ Panel de Control (Root)</h3>
-                <div class="row g-4">
-                    <div class="col-md-4">
-                        <div class="card p-3 bg-dark text-white h-100 shadow">
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="card-title fw-bold">📍 Gestión de Regiones</h5>
-                                <p class="small text-light flex-grow-1">
-                                    Configura las divisiones geográficas y países del sistema. Define dónde se ubicarán los futuros destinos turísticos de la plataforma.
-                                </p>
-                                <a href="{% url 'gestionar_regiones' %}" class="btn btn-light btn-sm rounded-pill mt-2 px-3 fw-bold">Administrar</a>
-                            </div>
+        {% if user.rol == 'admin' or user.is_superuser %}
+        <div class="col-12 mt-5">
+            <h3 class="fw-bold text-danger mb-3">🛠️ Panel de Control (Root)</h3>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card p-3 bg-dark text-white h-100 shadow">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold">📍 Gestión de Regiones</h5>
+                            <p class="small text-light flex-grow-1">Configura las divisiones geográficas y países del sistema.</p>
+                            <a href="{% url 'gestionar_regiones' %}" class="btn btn-light btn-sm rounded-pill mt-2 px-3 fw-bold">Administrar</a>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="card p-3 bg-dark text-white h-100 shadow">
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="card-title fw-bold">🏛️ Puntos de Interés</h5>
-                                <p class="small text-light flex-grow-1">
-                                    Administra el catálogo completo de monumentos, museos y parques. Añade fotos, descripciones detalladas y categorías para los viajeros.
-                                </p>
-                                <a href="{% url 'gestionar_lugares' %}" class="btn btn-light btn-sm rounded-pill mt-2 px-3 fw-bold">Administrar</a>
-                            </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card p-3 bg-dark text-white h-100 shadow">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold">🏛️ Puntos de Interés</h5>
+                            <p class="small text-light flex-grow-1">Administra el catálogo completo de monumentos y parques.</p>
+                            <a href="{% url 'gestionar_lugares' %}" class="btn btn-light btn-sm rounded-pill mt-2 px-3 fw-bold">Administrar</a>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="card p-3 bg-danger text-white h-100 border-0 shadow">
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="card-title fw-bold">⚡ Sincronizar API</h5>
-                                <p class="small text-light flex-grow-1">
-                                    Ejecuta la importación masiva de datos mediante archivos externos JSON o CSV. Ideal para actualizar el catálogo con cientos de destinos de golpe.
-                                </p>
-                                <a href="{% url 'sincronizar_datos' %}" class="btn btn-light btn-sm rounded-pill mt-2 px-3 text-danger fw-bold">Ejecutar Carga</a>
-                            </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card p-3 bg-danger text-white h-100 border-0 shadow">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold">⚡ Sincronizar API</h5>
+                            <p class="small text-light flex-grow-1">Ejecuta la importación masiva de datos mediante JSON o CSV.</p>
+                            <a href="{% url 'sincronizar_datos' %}" class="btn btn-light btn-sm rounded-pill mt-2 px-3 text-danger fw-bold">Ejecutar Carga</a>
                         </div>
                     </div>
                 </div>
             </div>
-            {% endif %}
         </div>
+        {% endif %}
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+</div>
+{% endblock %}
