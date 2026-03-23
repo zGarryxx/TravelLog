@@ -116,7 +116,7 @@
 
     <nav class="navbar navbar-expand-lg navbar-light navbar-glass sticky-top shadow-sm py-3">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="/">
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
                 <i class="bi bi-compass-fill fs-2 me-2 text-primary" style="background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
                 <span class="brand-text">TravelLog</span>
             </a>
@@ -154,7 +154,7 @@
                     {% endif %}
                 </ul>
 
-               <ul class="navbar-nav mb-2 mb-lg-0">
+                <ul class="navbar-nav mb-2 mb-lg-0">
                     {% if user.is_authenticated %}
                         <li class="nav-item dropdown">
                             <a class="nav-link nav-link-custom d-flex align-items-center dropdown-toggle border rounded-pill px-3 shadow-sm transition-hover"
@@ -176,14 +176,28 @@
                                 </li>
                             </ul>
                         </li>
-                    {% else %}
-                        {% endif %}
+                    {% endif %}
                 </ul>
             </div>
         </div>
     </nav>
 
     <main>
+        <div class="container mt-4">
+            {% if messages %}
+                <div class="row mb-2 animate__animated animate__fadeInDown">
+                    <div class="col-12">
+                        {% for message in messages %}
+                            <div class="alert {% if message.tags == 'error' %}alert-danger{% elif message.tags == 'warning' %}alert-warning{% elif message.tags == 'info' %}alert-info{% else %}alert-success{% endif %} alert-dismissible fade show border-0 shadow-sm rounded-4 d-flex align-items-center" role="alert">
+                                <i class="bi {% if message.tags == 'error' %}bi-x-octagon-fill{% elif message.tags == 'warning' %}bi-exclamation-triangle-fill{% elif message.tags == 'info' %}bi-info-circle-fill text-info{% else %}bi-check-circle-fill{% endif %} fs-4 me-3"></i>
+                                <div class="fw-medium">{{ message }}</div>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
         {% block content %}
         {% endblock %}
     </main>

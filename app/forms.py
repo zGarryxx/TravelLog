@@ -1,9 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
-from .models import Usuario, Region, Lugar
+from .models import Region, Lugar
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import User
 import re
 
 # Obtenemos el modelo de usuario actual (tu app.Usuario)
@@ -100,3 +99,37 @@ class ImportarArchivoForm(forms.Form):
             'accept': '.json, .csv'
         })
     )
+
+OPCIONES_TIPO = [
+    ('Monumento', 'Monumento Histórico'),
+    ('Museo', 'Museo / Galería'),
+    ('Parque', 'Parque / Naturaleza'),
+    ('Plaza', 'Plaza Pública'),
+    ('Templo', 'Iglesia / Templo'),
+    ('Ocio', 'Centro de Ocio / Atracciones'),
+    ('Otro', 'Otro / General'),
+]
+
+# Formulario para crear o editar un lugar, utilizando el modelo Lugar y personalizando los campos con widgets para mejorar la apariencia del formulario en la interfaz de usuario, además de incluir un campo de selección para el tipo de lugar con opciones predefinidas.
+class LugarForm(forms.ModelForm):
+
+    class Meta:
+        model = Lugar
+        fields = ['nombre', 'ciudad', 'tipo', 'descripcion', 'imagen']
+
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'form-control rounded-pill', 'placeholder': 'Ej. Torre Eiffel'}),
+            'ciudad': forms.TextInput(attrs={'class': 'form-control rounded-pill', 'placeholder': 'Ej. París'}),
+            'tipo': forms.Select(choices=OPCIONES_TIPO, attrs={'class': 'form-select rounded-pill cursor-pointer'}),
+
+            'descripcion': forms.Textarea(attrs={
+                'class': 'form-control',
+                'style': 'border-radius: 15px;',
+                'placeholder': 'Breve descripción (máx. 100 caracteres)...',
+                'rows': '3',
+                'maxlength': '100'
+            }),
+
+            'imagen': forms.TextInput(
+                attrs={'class': 'form-control rounded-pill', 'placeholder': 'URL de la imagen (opcional)'}),
+        }

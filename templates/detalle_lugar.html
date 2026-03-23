@@ -3,16 +3,17 @@
 {% block content %}
 <style>
     body {
-        overflow: hidden;
+        overflow-y: auto;
         background-color: #f4f7f6;
+        min-height: 100vh;
     }
 
     .detalle-wrapper {
-        height: calc(100vh - 70px);
+        min-height: calc(100vh - 70px);
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 20px;
+        padding: 40px 20px;
     }
 
     .card-detalle-fija {
@@ -22,37 +23,34 @@
         width: 100%;
         max-width: 1200px;
         height: 85vh;
+        min-height: 650px;
         box-shadow: 0 30px 60px rgba(0,0,0,0.12);
         overflow: hidden;
         display: flex;
+        position: relative;
     }
 
     .img-col {
-        background-color: #0f0f0f;
+        background-color: #000;
         width: 50%;
         height: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
-        position: relative;
         overflow: hidden;
     }
 
     .img-col img {
-        width: 100%;
-        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
         object-fit: contain;
         transition: transform 0.5s ease;
-    }
-
-    .img-col:hover img {
-        transform: scale(1.03);
     }
 
     .info-col {
         width: 50%;
         height: 100%;
-        padding: 3.5rem !important;
+        padding: 2.5rem 3.5rem !important;
         display: flex;
         flex-direction: column;
         background: white;
@@ -61,71 +59,35 @@
     .scroll-texto {
         overflow-y: auto;
         flex-grow: 1;
-        padding-right: 20px;
-        margin-bottom: 15px;
+        padding-right: 15px;
+        margin-bottom: 20px;
     }
+
     .scroll-texto::-webkit-scrollbar { width: 6px; }
     .scroll-texto::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
-    .scroll-texto::-webkit-scrollbar-track { background: #f3f4f6; border-radius: 10px; }
 
-    .stars-rating {
-        display: flex;
-        flex-direction: row-reverse;
-        justify-content: flex-end;
-        gap: 8px;
+    .footer-acciones {
+        margin-top: auto;
+        padding-top: 20px;
+        border-top: 1px solid #f1f1f1;
+        background: white;
     }
+
+    .stars-rating { display: flex; flex-direction: row-reverse; justify-content: center; gap: 8px; }
     .stars-rating input { display: none; }
-    .stars-rating label {
-        font-size: 2rem;
-        color: #e5e7eb;
-        cursor: pointer;
-        transition: all 0.2s ease-in-out;
-    }
-    .stars-rating input:checked ~ label,
-    .stars-rating label:hover,
-    .stars-rating label:hover ~ label {
-        color: #fbbf24;
-        transform: scale(1.15);
-        text-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
-    }
+    .stars-rating label { font-size: 2rem; color: #e5e7eb; cursor: pointer; }
+    .stars-rating input:checked ~ label, .stars-rating label:hover, .stars-rating label:hover ~ label { color: #fbbf24; }
 
-    .glass-card {
-        background: #ffffff;
-        border: 1px solid #f3f4f6;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.03);
-        border-radius: 20px;
-    }
+    .glass-card { background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 20px; }
 
-    .user-avatar {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        color: white;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
-    }
-
-    .breadcrumb-back {
-        background: none; border: none; padding: 0;
-        color: #9ca3af; cursor: pointer; text-decoration: none; font-weight: 500;
-    }
-    .breadcrumb-back:hover { color: #667eea; text-decoration: underline; }
-
-    .transition-hover {
-        transition: all 0.2s ease;
-    }
-    .transition-hover:hover {
-        transform: translateY(-2px);
-    }
+    .modal { z-index: 9999 !important; }
+    .modal-backdrop { z-index: 9998 !important; }
 </style>
 
 <div class="detalle-wrapper">
     <div class="card card-detalle-fija animate__animated animate__fadeInUp">
         <div class="row g-0 h-100 w-100">
+
             <div class="col-md-6 img-col">
                 <img src="{{ lugar.imagen }}" alt="{{ lugar.nombre }}">
             </div>
@@ -133,160 +95,110 @@
             <div class="col-md-6 info-col">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-2">
-                        <li class="breadcrumb-item">
-                            <a href="{{ url_retorno }}" class="breadcrumb-back"><i class="bi bi-compass"></i> Explorar</a>
-                        </li>
-                        <li class="breadcrumb-item active text-primary fw-bold small" style="letter-spacing: 1px;">{{ lugar.tipo|upper }}</li>
+                        <li class="breadcrumb-item"><a href="{{ url_retorno }}" class="text-muted text-decoration-none small">Explorar</a></li>
+                        <li class="breadcrumb-item active text-primary fw-bold small">{{ lugar.tipo|upper }}</li>
                     </ol>
                 </nav>
 
                 <h1 class="fw-bolder text-dark mb-1" style="font-size: 2.8rem; letter-spacing: -1px;">{{ lugar.nombre }}</h1>
-                <p class="text-muted fs-6 mb-4 fw-medium">
-                    <i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ lugar.ciudad }}
-                </p>
+                <p class="text-muted mb-4 fw-medium"><i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ lugar.ciudad }}</p>
 
                 <div class="scroll-texto">
+                    <p class="text-secondary fs-6 mb-5" style="line-height: 1.8; text-align: justify;">{{ lugar.descripcion }}</p>
 
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show small shadow-sm border-0 text-dark" role="alert" style="border-radius: 12px;
-                                {% if message.tags == 'success' %} background-color: #d1fae5;
-                                {% elif message.tags == 'info' %} background-color: #dbeafe;
-                                {% else %} background-color: #fef3c7; {% endif %}">
-
-                                {% if message.tags == 'success' %}
-                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                {% elif message.tags == 'info' %}
-                                    <i class="bi bi-info-circle-fill text-info me-2"></i>
-                                {% else %}
-                                    <i class="bi bi-exclamation-circle-fill text-warning me-2"></i>
-                                {% endif %}
-
-                                {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-
-                    <p class="text-secondary fs-6 mb-5" style="line-height: 1.8; text-align: justify;">
-                        {{ lugar.descripcion }}
-                    </p>
-
-                    <div class="glass-card p-4 mt-2 mb-4">
-
-                        <h6 class="fw-bold mb-3 small text-uppercase text-primary" style="letter-spacing: 1px;">
-                            <i class="bi bi-pencil-square me-1"></i>
-                            {% if mi_resena %}Editar valoración{% else %}Deja tu valoración{% endif %}
-                        </h6>
-
-                        <form action="{% url 'guardar_resena' lugar.nombre %}" method="POST" id="formResena" onsubmit="prepararEnvio(this);">
+                    <div class="glass-card p-4 mb-4">
+                        <h6 class="fw-bold mb-3 small text-uppercase text-primary">Tu valoración</h6>
+                        <form action="{% url 'guardar_resena' lugar.nombre %}" method="POST" onsubmit="prepararEnvio(this);">
                             {% csrf_token %}
                             <div class="mb-3 d-flex justify-content-center">
                                 <div class="stars-rating">
                                     {% for i in "54321" %}
-                                    <input type="radio" id="star{{ i }}" name="puntuacion" value="{{ i }}" required
-                                           {% if mi_resena and mi_resena.puntuacion|slugify == i %}checked{% endif %}>
+                                    <input type="radio" id="star{{ i }}" name="puntuacion" value="{{ i }}" required {% if mi_resena and mi_resena.puntuacion|slugify == i %}checked{% endif %}>
                                     <label for="star{{ i }}"><i class="bi bi-star-fill"></i></label>
                                     {% endfor %}
                                 </div>
                             </div>
 
-                            <textarea name="comentario" class="form-control border-0 bg-light mb-3 p-3" rows="2"
-                                      placeholder="¿Qué te ha parecido este lugar? Tu opinión ayuda a otros viajeros..."
+                            <textarea name="comentario"
+                                      class="form-control border-0 bg-white mb-3 p-3 shadow-sm"
+                                      rows="2"
+                                      placeholder="Cuéntanos tu experiencia en este lugar... ¿Qué fue lo que más te gustó?"
                                       style="border-radius: 15px; font-size: 0.9rem; resize: none;">{% if mi_resena %}{{ mi_resena.comentario }}{% endif %}</textarea>
 
                             <div class="d-flex gap-2">
-                                <button type="submit" id="btnSubmitResena" class="btn btn-dark flex-grow-1 rounded-pill fw-bold py-2 shadow-sm">
-                                    {% if mi_resena %}Actualizar Valoración{% else %}Publicar Reseña{% endif %}
+                                <button type="submit" id="btnSubmitResena" class="btn btn-dark flex-grow-1 rounded-pill fw-bold">
+                                    {% if mi_resena %}Actualizar{% else %}Publicar{% endif %}
                                 </button>
-
                                 {% if mi_resena %}
-                                    <button type="button" class="btn btn-light text-danger rounded-pill px-3 shadow-sm border" data-bs-toggle="modal" data-bs-target="#deleteReviewModal">
+                                    <button type="button" class="btn btn-light text-danger rounded-pill border shadow-sm px-3" data-bs-toggle="modal" data-bs-target="#deleteReviewModal">
                                         <i class="bi bi-trash3-fill"></i>
                                     </button>
                                 {% endif %}
                             </div>
                         </form>
-
                     </div>
 
-                    <div class="mt-5">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h6 class="fw-bold text-dark text-uppercase mb-0" style="letter-spacing: 1px;">Opiniones de viajeros</h6>
-                            <span class="badge bg-dark rounded-pill">{{ resenas|length }}</span>
-                        </div>
-
+                    <div class="mt-2">
+                        <h6 class="fw-bold text-dark text-uppercase small mb-3">Opiniones ({{ resenas|length }})</h6>
                         {% for r in resenas %}
-                            <div class="glass-card mb-3 p-3 transition-hover">
-                                <div class="d-flex align-items-center mb-2">
-                                    <div class="user-avatar me-3">
-                                        {{ r.usuario_nombre|make_list|first|upper }}
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">{{ r.usuario_nombre }}</h6>
-                                        <div class="text-warning" style="font-size: 0.75rem;">
-                                            {% for j in "12345" %}
-                                                {% if forloop.counter <= r.puntuacion %}<i class="bi bi-star-fill"></i>{% else %}<i class="bi bi-star text-muted opacity-25"></i>{% endif %}
-                                            {% endfor %}
-                                        </div>
-                                    </div>
-                                    <small class="text-muted" style="font-size: 0.7rem;">{{ r.fecha|date:"d M y" }}</small>
+                            <div class="p-3 mb-2 border-bottom">
+                                <div class="d-flex justify-content-between">
+                                    <span class="fw-bold small">{{ r.usuario_nombre }}</span>
+                                    <span class="text-warning small">
+                                        {% for j in "12345" %}{% if forloop.counter <= r.puntuacion %}<i class="bi bi-star-fill"></i>{% endif %}{% endfor %}
+                                    </span>
                                 </div>
-                                <p class="text-secondary mb-0 ms-5" style="font-size: 0.85rem; font-style: italic;">"{{ r.comentario }}"</p>
-                            </div>
-                        {% empty %}
-                            <div class="text-center py-5 glass-card" style="border: 2px dashed #e5e7eb;">
-                                <i class="bi bi-chat-heart text-muted opacity-25 mb-2" style="font-size: 2.5rem;"></i>
-                                <p class="text-muted small mb-0 fw-medium">Todavía no hay reseñas.<br>¡Anímate a ser el primero!</p>
+                                <p class="text-muted small mb-0 mt-1">"{{ r.comentario }}"</p>
                             </div>
                         {% endfor %}
                     </div>
                 </div>
 
-                <div class="mt-auto pt-4 border-top text-center">
+                <div class="footer-acciones">
                     <div class="d-flex gap-2 mb-3">
                         <form action="{% url 'toggle_favorito' lugar.nombre %}" method="POST" class="flex-grow-1 m-0">
                             {% csrf_token %}
-                            {% if es_favorito %}
-                                <button type="submit" class="btn btn-outline-danger btn-lg w-100 rounded-pill fw-bolder shadow-sm transition-hover" style="padding: 14px; border-width: 2px; font-size: 0.95rem;">
-                                    <i class="bi bi-heart-fill me-1"></i> Quitar Favorito
-                                </button>
-                            {% else %}
-                                <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill fw-bolder shadow transition-hover"
-                                        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border:none; padding: 14px; font-size: 0.95rem;">
-                                    <i class="bi bi-heart me-1"></i> Favorito
-                                </button>
-                            {% endif %}
+                            <button type="submit" class="btn {% if es_favorito %}btn-outline-danger{% else %}btn-primary{% endif %} w-100 rounded-pill fw-bolder shadow-sm transition-hover" style="padding: 14px; font-size: 0.95rem;">
+                                <i class="bi {% if es_favorito %}bi-heart-fill{% else %}bi-heart{% endif %} me-1"></i>
+                                {% if es_favorito %}Quitar Favorito{% else %}Favorito{% endif %}
+                            </button>
                         </form>
 
-                        <button type="button" class="btn btn-dark btn-lg flex-grow-1 rounded-pill fw-bolder shadow-sm transition-hover"
-                                data-bs-toggle="modal" data-bs-target="#modalAnadirRuta" style="padding: 14px; font-size: 0.95rem;">
-                            <i class="bi bi-signpost-split-fill me-1"></i> Añadir a Ruta
+                        <button type="button"
+                                class="btn {% if cantidad_rutas > 0 %}btn-success{% else %}btn-dark{% endif %} flex-grow-1 rounded-pill fw-bolder shadow-sm transition-hover"
+                                data-bs-toggle="modal" data-bs-target="#modalAnadirRuta"
+                                style="padding: 14px; font-size: 0.95rem; {% if cantidad_rutas > 0 %}background-color: #10b981; border: none;{% endif %}">
+
+                            {% if cantidad_rutas > 0 %}
+                                <i class="bi bi-check-circle-fill me-1"></i> En {{ cantidad_rutas }} {% if cantidad_rutas == 1 %}ruta{% else %}rutas{% endif %}
+                            {% else %}
+                                <i class="bi bi-signpost-split-fill me-1"></i> Añadir a Ruta
+                            {% endif %}
                         </button>
                     </div>
 
-                    <a href="{{ url_retorno }}" class="text-muted small fw-medium text-decoration-none transition">
-                        <i class="bi bi-arrow-left-short fs-5 align-middle"></i> Volver al listado
-                    </a>
+                    <div class="text-center">
+                        <a href="{{ url_retorno }}" class="text-muted small fw-medium text-decoration-none transition">
+                            <i class="bi bi-arrow-left-short fs-5 align-middle"></i> Volver al listado
+                        </a>
+                    </div>
                 </div>
+
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="deleteReviewModal" tabindex="-1">
+<div class="modal fade" id="deleteReviewModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius: 20px; border: none; box-shadow: 0 20px 50px rgba(0,0,0,0.1);">
-            <div class="modal-body p-4 p-md-5 text-center">
-                <div class="text-danger mb-3">
-                    <i class="bi bi-exclamation-circle-fill" style="font-size: 3rem;"></i>
-                </div>
-                <h4 class="fw-bold text-dark">¿Eliminar reseña?</h4>
-                <p class="text-secondary mb-4">Esta acción no se puede deshacer y tu comentario desaparecerá del muro.</p>
-                <div class="d-flex gap-3 justify-content-center">
-                    <button type="button" class="btn btn-light rounded-pill px-4 fw-medium shadow-sm" data-bs-dismiss="modal">Cancelar</button>
-                    <a href="{% url 'borrar_resena' lugar.nombre %}" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm">Sí, eliminar</a>
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 25px;">
+            <div class="modal-body p-5 text-center">
+                <div class="text-danger mb-3"><i class="bi bi-exclamation-octagon-fill" style="font-size: 3.5rem;"></i></div>
+                <h4 class="fw-bold">¿Borrar tu opinión?</h4>
+                <p class="text-muted">Esta acción eliminará permanentemente tu valoración.</p>
+                <div class="d-flex gap-2 mt-4">
+                    <button type="button" class="btn btn-light rounded-pill flex-grow-1 py-2 fw-bold" data-bs-dismiss="modal">Cancelar</button>
+                    <a href="{% url 'borrar_resena' lugar.nombre %}" class="btn btn-danger rounded-pill flex-grow-1 py-2 fw-bold">Sí, eliminar</a>
                 </div>
             </div>
         </div>
@@ -295,59 +207,45 @@
 
 <div class="modal fade" id="modalAnadirRuta" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 28px;">
-            <div class="modal-header border-0 pt-4 px-4 pb-2">
-                <h4 class="fw-bold mb-0 text-dark">Añadir a itinerario</h4>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 25px;">
+            <div class="modal-header border-0 pt-4 px-4">
+                <h5 class="fw-bold mb-0">Gestionar en itinerarios</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
 
             <form action="{% url 'agregar_parada' lugar.nombre %}" method="POST">
                 {% csrf_token %}
-                <div class="modal-body px-4 py-3">
-
-                    <div class="d-flex align-items-center mb-4 p-3 bg-light rounded-4 border">
-                        <img src="{{ lugar.imagen }}" alt="{{ lugar.nombre }}" class="rounded-3 me-3 shadow-sm" style="width: 60px; height: 60px; object-fit: cover;">
-                        <div>
-                            <h6 class="fw-bold mb-0 text-dark">{{ lugar.nombre }}</h6>
-                            <small class="text-muted"><i class="bi bi-geo-alt-fill text-danger"></i> {{ lugar.ciudad }}</small>
-                        </div>
-                    </div>
-
+                <div class="modal-body p-4">
                     {% if mis_rutas %}
-                        <label class="form-label fw-bold text-secondary small text-uppercase" style="letter-spacing: 1px;">Selecciona tu viaje</label>
-                        <select name="itinerario_id" class="form-select bg-light border-0 p-3 fs-6 text-dark fw-medium shadow-none" required style="border-radius: 16px;">
-                            <option value="" disabled selected>Elige un itinerario de tu lista...</option>
+                        <label class="small fw-bold text-muted mb-2 text-uppercase">Selecciona un viaje</label>
+                        <select name="itinerario_id" class="form-select bg-light border-0 p-3" style="border-radius: 15px;" required>
+                            <option value="" disabled selected>Elige un itinerario...</option>
                             {% for ruta in mis_rutas %}
-                                <option value="{{ ruta.id }}">{{ ruta.titulo }} ({{ ruta.paradas|length }} paradas)</option>
+                                <option value="{{ ruta.id }}">
+                                    {{ ruta.titulo }} {% if ruta.id in rutas_con_lugar %}(Ya añadido){% endif %}
+                                </option>
                             {% endfor %}
                         </select>
+                        <button type="submit" class="btn btn-dark w-100 rounded-pill fw-bold mt-4 py-3 shadow">
+                            Guardar Parada
+                        </button>
                     {% else %}
-                        <div class="text-center py-4">
-                            <i class="bi bi-compass text-muted opacity-25 mb-3" style="font-size: 3rem;"></i>
-                            <h6 class="fw-bold text-dark">No tienes rutas creadas</h6>
-                            <p class="text-muted small mb-0">Debes crear un itinerario primero para poder guardar paradas.</p>
-                            <a href="{% url 'mis_itinerarios' %}" class="btn btn-outline-dark rounded-pill mt-3 fw-bold px-4">Ir a Mis Rutas</a>
+                        <div class="text-center py-3">
+                            <p class="text-muted small">No tienes rutas creadas todavía.</p>
+                            <a href="{% url 'mis_itinerarios' %}" class="btn btn-outline-dark btn-sm rounded-pill">Crear mi primera ruta</a>
                         </div>
                     {% endif %}
                 </div>
-
-                {% if mis_rutas %}
-                <div class="modal-footer border-0 pb-4 px-4 pt-2">
-                    <button type="button" class="btn btn-light rounded-pill px-4 fw-bold shadow-sm" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-dark rounded-pill px-4 fw-bold shadow-sm">Guardar Parada</button>
-                </div>
-                {% endif %}
             </form>
         </div>
     </div>
 </div>
 
 <script>
-    function prepararEnvio(formulario) {
+    function prepararEnvio(form) {
         const btn = document.getElementById('btnSubmitResena');
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Guardando...';
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Enviando...';
         btn.classList.add('disabled');
-        btn.style.opacity = '0.8';
     }
 </script>
 

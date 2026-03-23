@@ -1,4 +1,5 @@
 from bson import ObjectId
+from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -28,10 +29,14 @@ def registrar_usuario(request):
     if request.method == 'POST':
         form = RegistroForm(request.POST)
         if form.is_valid():
+            email = form.cleaned_data.get('email')
+
+            if User.objects.filter(email=email).exists():
+                messages.error(request, 'Este correo electrónico ya está registrado. Intenta iniciar sesión.')
+                return render(request, 'register.html', {'form': form})
+
             user = form.save(commit=False)
-
             user.nombre = form.cleaned_data.get('nombre')
-
             user.rol = 'viajero'
             user.is_superuser = False
             user.is_staff = False
@@ -175,7 +180,7 @@ def eliminar_region(request, region_nombre):
     borrados, _ = Region.objects.using('mongodb').filter(nombre=region_nombre).delete()
 
     if borrados > 0:
-        messages.success(request, f'La región "{region_nombre}" ha sido borrada del mapa.')
+        messages.info(request, f'La región "{region_nombre}" ha sido borrada del mapa.')
     else:
         messages.error(request, 'La región que intentas eliminar no existe o ya fue borrada.')
 
@@ -255,7 +260,7 @@ def eliminar_lugar(request, lugar_nombre):
     borrados, _ = Lugar.objects.using('mongodb').filter(nombre=lugar_nombre).delete()
 
     if borrados > 0:
-        messages.success(request, f'El lugar "{lugar_nombre}" ha sido demolido de la base de datos.')
+        messages.info(request, f'El lugar "{lugar_nombre}" ha sido demolido de la base de datos.')
     else:
         messages.error(request, 'El lugar no existe o ya fue borrado.')
 
@@ -327,7 +332,7 @@ def borrar_todo_lugares(request):
         return redirect('home')
 
     Lugar.objects.using('mongodb').all().delete()
-    messages.success(request, "💥 Catálogo de lugares vaciado por completo.")
+    messages.info(request, "💥 Catálogo de lugares vaciado por completo.")
     return redirect('gestionar_lugares')
 
 # 14. Borrado masivo de lugares y regiones (solo para admin)
@@ -338,7 +343,7 @@ def borrar_todo_regiones(request):
         return redirect('home')
 
     Region.objects.using('mongodb').all().delete()
-    messages.success(request, "💥 Lista de regiones vaciada por completo.")
+    messages.info(request, "💥 Lista de regiones vaciada por completo.")
     return redirect('gestionar_regiones')
 
 # 15. Explorar Destinos (filtro por nombre, ciudad, tipo y región)
@@ -392,6 +397,7 @@ def detalle_lugar(request, nombre_lugar):
     mi_resena = None
     es_favorito = False
     mis_rutas = []
+    rutas_con_lugar = []
 
     if request.user.is_authenticated:
         mi_resena = Resena.objects.using('mongodb').filter(
@@ -404,13 +410,19 @@ def detalle_lugar(request, nombre_lugar):
 
         mis_rutas = Itinerario.objects.using('mongodb').filter(usuario_id=request.user.id)
 
+        for ruta in mis_rutas:
+            if nombre_lugar in ruta.paradas:
+                rutas_con_lugar.append(ruta.id)
+
     return render(request, 'detalle_lugar.html', {
         'lugar': lugar,
         'resenas': resenas,
         'mi_resena': mi_resena,
         'url_retorno': url_retorno,
         'es_favorito': es_favorito,
-        'mis_rutas': mis_rutas
+        'mis_rutas': mis_rutas,
+        'rutas_con_lugar': rutas_con_lugar,
+        'cantidad_rutas': len(rutas_con_lugar)
     })
 
 # 17. Guardar reseña de un lugar (puntuación y comentario) por parte de un usuario autenticado.
@@ -509,7 +521,7 @@ def crear_itinerario(request):
     return redirect('mis_itinerarios')
 
 # 22. Agregar un lugar como parada a un itinerario específico del usuario autenticado, asegurando que el lugar no se agregue más de una vez al mismo itinerario.
-@login_required
+@login_required(login_url='login')
 def agregar_parada(request, nombre_lugar):
 
     if request.method == 'POST':
@@ -517,19 +529,24 @@ def agregar_parada(request, nombre_lugar):
 
         if itinerario_id:
             try:
-                ruta = Itinerario.objects.using('mongodb').get(id=itinerario_id, usuario_id=request.user.id)
+                itinerario = Itinerario.objects.using('mongodb').get(
+                    id=itinerario_id,
+                    usuario_id=request.user.id
+                )
 
-                if nombre_lugar not in ruta.paradas:
-                    ruta.paradas.append(nombre_lugar)
-                    ruta.save(using='mongodb')
-                    messages.success(request, f"¡Añadido a tu ruta '{ruta.titulo}'!")
+                if nombre_lugar not in itinerario.paradas:
+                    itinerario.paradas.append(nombre_lugar)
+                    itinerario.save()
+                    messages.success(request, f'¡"{nombre_lugar}" se ha añadido a tu viaje "{itinerario.titulo}"!')
                 else:
-                    messages.warning(request, f"Este lugar ya estaba en la ruta '{ruta.titulo}'.")
+                    messages.info(request, f'El destino "{nombre_lugar}" ya estaba incluido en esta ruta.')
+
+                return redirect('detalle_itinerario', itinerario_id)
 
             except Itinerario.DoesNotExist:
-                messages.error(request, "Hubo un error al encontrar el itinerario.")
+                messages.error(request, 'No se pudo encontrar el itinerario.')
 
-    return redirect('detalle_lugar', nombre_lugar=nombre_lugar)
+    return redirect('detalle_lugar', nombre_lugar)
 
 # 23. Mostrar los detalles de un itinerario específico.
 @login_required
@@ -609,18 +626,32 @@ def mover_parada(request, itinerario_id, nombre_lugar, direccion):
 
     return redirect('detalle_itinerario', itinerario_id=itinerario_id)
 
-# 27. Mostrar estadísticas globales sobre los lugares, como el número total de valoraciones, los lugares mejor valorados, el promedio de puntuación por categoría y las rutas más populares basadas en las paradas más comunes.
-@login_required
+# 27. Mostrar estadísticas globales de la plataforma, incluyendo el número total de rutas creadas, el número total de valoraciones, el número de usuarios únicos que han dejado reseñas, los lugares mejor valorados (con al menos 3 votos), el promedio de puntuación por categoría de lugar y las rutas más populares (con más paradas). Asegurar que solo los administradores puedan acceder a esta sección.
+@login_required(login_url='login')
 def estadisticas_globales(request):
 
     total_rutas_creadas = Itinerario.objects.using('mongodb').count()
     total_valoraciones = Resena.objects.using('mongodb').count()
     usuarios_unicos = len(set(Resena.objects.using('mongodb').values_list('usuario_id', flat=True)))
 
-    mejores_lugares = Resena.objects.using('mongodb').values('lugar_nombre').annotate(
+    lugares_stats = list(Resena.objects.using('mongodb').values('lugar_nombre').annotate(
         puntuacion_media=Avg('puntuacion'),
         total_votos=Count('id')
-    ).order_by('-puntuacion_media')[:5]
+    ))
+
+    mejores_lugares = []
+
+    if lugares_stats:
+        m = 3
+        C = sum(lugar['puntuacion_media'] for lugar in lugares_stats) / len(lugares_stats)
+
+        for lugar in lugares_stats:
+            v = lugar['total_votos']
+            R = lugar['puntuacion_media']
+
+            lugar['puntuacion_ponderada'] = (v / (v + m) * R) + (m / (v + m) * C)
+
+        mejores_lugares = sorted(lugares_stats, key=lambda x: x['puntuacion_ponderada'], reverse=True)[:5]
 
     lugares = Lugar.objects.using('mongodb').all()
     mapa_categorias = {lugar.nombre: lugar.tipo for lugar in lugares}
@@ -657,7 +688,6 @@ def estadisticas_globales(request):
                 conteo_paradas[parada] = 1
 
     top_rutas_raw = sorted(conteo_paradas.items(), key=lambda item: item[1], reverse=True)[:10]
-
     top_rutas = [{'nombre': k, 'cantidad': v} for k, v in top_rutas_raw]
 
     return render(request, 'estadisticas.html', {
@@ -790,3 +820,26 @@ def eliminar_resena_admin(request, resena_id):
         messages.error(request, f"Error al eliminar la reseña: {e}")
 
     return redirect('panel_admin')
+
+# 33. Editar el título de un itinerario, asegurando que solo el usuario que creó el itinerario pueda editarlo y que se actualice correctamente en la base de datos.
+@login_required(login_url='login')
+def editar_itinerario(request, itinerario_id):
+
+    if request.method == 'POST':
+        nuevo_titulo = request.POST.get('titulo')
+
+        if nuevo_titulo:
+            try:
+                itinerario = Itinerario.objects.using('mongodb').get(
+                    id=itinerario_id,
+                    usuario_id=request.user.id
+                )
+
+                itinerario.titulo = nuevo_titulo
+                itinerario.save()
+                messages.success(request, f'¡El viaje ahora se llama "{nuevo_titulo}"!')
+
+            except Itinerario.DoesNotExist:
+                messages.error(request, 'No se pudo editar el itinerario o no tienes permisos.')
+
+    return redirect('mis_itinerarios')

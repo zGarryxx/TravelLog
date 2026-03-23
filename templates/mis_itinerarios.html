@@ -68,17 +68,6 @@
 
 <div class="container py-5">
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4" role="alert"
-                 style="background-color: {% if message.tags == 'success' %}#d1fae5{% else %}#fef3c7{% endif %};">
-                <i class="bi {% if message.tags == 'success' %}bi-check-circle-fill text-success{% else %}bi-exclamation-circle-fill text-warning{% endif %} me-2"></i>
-                <span class="text-dark fw-medium">{{ message }}</span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
-
     <div class="header-rutas d-flex flex-column flex-md-row justify-content-between align-items-md-center animate__animated animate__fadeInDown">
         <div class="mb-4 mb-md-0">
             <h1 class="fw-bold mb-2 display-6" style="letter-spacing: -1px;">Mis Itinerarios</h1>
@@ -110,11 +99,44 @@
                             Ver Paradas
                         </a>
 
+                        <button type="button" class="btn btn-outline-primary rounded-circle d-flex align-items-center justify-content-center transition-hover"
+                                style="width: 45px; height: 45px; flex-shrink: 0;" title="Renombrar Ruta"
+                                data-bs-toggle="modal" data-bs-target="#editarRutaModal{{ ruta.id }}">
+                            <i class="bi bi-pencil-fill"></i>
+                        </button>
+
                         <button type="button" class="btn btn-outline-danger rounded-circle d-flex align-items-center justify-content-center transition-hover"
-                                style="width: 45px; height: 45px;" title="Eliminar Ruta"
+                                style="width: 45px; height: 45px; flex-shrink: 0;" title="Eliminar Ruta"
                                 data-bs-toggle="modal" data-bs-target="#eliminarRutaModal{{ ruta.id }}">
                             <i class="bi bi-trash3-fill"></i>
                         </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="editarRutaModal{{ ruta.id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 shadow-lg" style="border-radius: 28px;">
+                        <div class="modal-header border-0 pt-4 px-4 pb-2">
+                            <h4 class="fw-bold mb-0 text-dark">Renombrar viaje</h4>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+
+                        <form action="{% url 'editar_itinerario' ruta.id %}" method="POST">
+                            {% csrf_token %}
+                            <div class="modal-body px-4 py-3">
+                                <div class="mb-2">
+                                    <label class="form-label fw-bold text-secondary small text-uppercase" style="letter-spacing: 1px;">Nuevo título</label>
+                                    <input type="text" name="titulo" class="form-control bg-light border-0 p-3 fs-5 text-dark fw-medium shadow-none"
+                                           value="{{ ruta.titulo }}" required style="border-radius: 16px;">
+                                </div>
+                            </div>
+
+                            <div class="modal-footer border-0 pb-4 px-4 pt-2">
+                                <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">Guardar Cambios</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>

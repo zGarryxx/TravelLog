@@ -35,4 +35,5 @@ urlpatterns = [
     path('panel-admin/usuario/<int:user_id>/eliminar/', views.eliminar_usuario, name='eliminar_usuario'),
     path('panel-admin/resena/<str:resena_id>/eliminar/', views.eliminar_resena_admin, name='eliminar_resena_admin'),
     path('panel-admin/usuario/<int:user_id>/desbanear/', views.desbanear_usuario, name='desbanear_usuario'),
+    path('itinerario/editar/<str:itinerario_id>/', views.editar_itinerario, name='editar_itinerario'),
 ]
