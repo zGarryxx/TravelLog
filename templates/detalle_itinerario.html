@@ -83,16 +83,28 @@
         transition: all 0.3s ease;
         overflow: hidden;
     }
+    @media (min-width: 768px) {
+        .card-parada {
+            height: 320px;
+        }
+    }
     .card-parada:hover {
         transform: translateY(-5px);
         box-shadow: 0 20px 40px rgba(0,0,0,0.08);
     }
-
+    .img-container {
+        background-color: #0f0f0f;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
     .img-parada {
         width: 100%;
         height: 100%;
-        min-height: 200px;
-        object-fit: cover;
+        object-fit: contain;
+        transition: transform 0.5s ease;
     }
 
     .empty-state {
@@ -145,27 +157,32 @@
                     <div class="timeline-dot"></div>
 
                     <div class="card card-parada">
-                        <div class="row g-0">
-                            <div class="col-md-4">
-                                <img src="{{ parada.imagen }}" class="img-parada rounded-start" alt="{{ parada.nombre }}">
+                        <div class="row g-0 h-100">
+
+                            <div class="col-md-4 img-container rounded-start">
+                                <img src="{{ parada.imagen }}" class="img-parada" alt="{{ parada.nombre }}">
                             </div>
 
-                            <div class="col-md-8">
-                                <div class="card-body p-4 p-lg-5 h-100 d-flex flex-column justify-content-center">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <span class="badge bg-light text-primary rounded-pill px-3 py-2 fw-bold border">{{ parada.tipo|upper }}</span>
-                                        <span class="text-muted fw-bold fs-5 opacity-25">#{{ forloop.counter }}</span>
+                            <div class="col-md-8 h-100">
+                                <div class="card-body p-4 h-100 d-flex flex-column justify-content-between">
+
+                                    <div>
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <span class="badge bg-light text-primary rounded-pill px-3 py-2 fw-bold border">{{ parada.tipo|upper }}</span>
+                                            <span class="text-muted fw-bold fs-5 opacity-25">#{{ forloop.counter }}</span>
+                                        </div>
+
+                                        <h2 class="fw-bold text-dark mb-1 text-truncate" style="max-width: 100%;">{{ parada.nombre }}</h2>
+                                        <p class="text-muted fw-medium mb-3 fs-6">
+                                            <i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ parada.ciudad }}
+                                        </p>
+
+                                        <p class="text-secondary mb-0" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                                            {{ parada.descripcion }}
+                                        </p>
                                     </div>
 
-                                    <h2 class="fw-bold text-dark mb-1">{{ parada.nombre }}</h2>
-                                    <p class="text-muted fw-medium mb-4 fs-5">
-                                        <i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ parada.ciudad }}
-                                    </p>
-
-                                    <p class="text-secondary mb-4">{{ parada.descripcion|truncatechars:150 }}</p>
-
-                                    <div class="mt-auto d-flex justify-content-between align-items-center border-top pt-3">
-
+                                    <div class="d-flex justify-content-between align-items-center border-top pt-3 mt-3">
                                         <div class="d-flex gap-2">
                                             <a href="{% url 'detalle_lugar' parada.nombre %}" class="btn btn-dark rounded-pill px-4 py-2 fw-bold shadow-sm">
                                                 Ver Detalles
@@ -188,8 +205,8 @@
                                                 <i class="bi bi-arrow-down text-dark fw-bolder"></i>
                                             </a>
                                         </div>
-
                                     </div>
+
                                 </div>
                             </div>
                         </div>
@@ -261,6 +278,23 @@
                 {% endfor %}
             ];
 
+            async function buscarCoordenadas(lugar, ciudad) {
+
+                let query1 = encodeURIComponent(`${lugar}, ${ciudad}`);
+                let response1 = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query1}&limit=1`);
+                let data1 = await response1.json();
+
+                if (data1 && data1.length > 0) return data1[0];
+
+                let query2 = encodeURIComponent(ciudad);
+                let response2 = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query2}&limit=1`);
+                let data2 = await response2.json();
+
+                if (data2 && data2.length > 0) return data2[0];
+
+                return null;
+            }
+
             async function dibujarRuta() {
                 let latlngs = [];
 
@@ -269,11 +303,10 @@
                     let numeroParada = i + 1;
 
                     try {
-                        let response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(parada.ciudad)}`);
-                        let data = await response.json();
+                        let ubicacion = await buscarCoordenadas(parada.nombre, parada.ciudad);
 
-                        if (data && data.length > 0) {
-                            let punto = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+                        if (ubicacion) {
+                            let punto = [parseFloat(ubicacion.lat), parseFloat(ubicacion.lon)];
                             latlngs.push(punto);
 
                             let customIcon = L.divIcon({
@@ -284,10 +317,14 @@
                                 popupAnchor: [0, -16]
                             });
 
-                            L.marker(punto, {icon: customIcon}).addTo(map).bindPopup(`<b>Parada #${numeroParada}</b><br>${parada.nombre}`);
+                            L.marker(punto, {icon: customIcon})
+                             .addTo(map)
+                             .bindPopup(`<b>Parada #${numeroParada}</b><br>${parada.nombre}<br><small>${parada.ciudad}</small>`);
+                        } else {
+                            console.warn(`⚠️ No se pudo ubicar en el mapa: ${parada.nombre} (${parada.ciudad})`);
                         }
                     } catch (error) {
-                        console.error("No se pudo ubicar:", parada.ciudad);
+                        console.error("Error al conectar con la API de mapas:", error);
                     }
 
                     await new Promise(resolve => setTimeout(resolve, 1100));
@@ -302,7 +339,7 @@
                     }).addTo(map);
                     map.fitBounds(polyline.getBounds(), {padding: [50, 50]});
                 } else if (latlngs.length === 1) {
-                    map.setView(latlngs[0], 10);
+                    map.setView(latlngs[0], 13);
                 }
             }
 
