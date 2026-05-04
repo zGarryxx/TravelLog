@@ -227,15 +227,27 @@ def editar_lugar(request, lugar_nombre):
         form = LugarForm(request.POST)
         if form.is_valid():
 
+            nuevo_nombre = form.cleaned_data['nombre']
+
             Lugar.objects.using('mongodb').filter(nombre=lugar_nombre).update(
-                nombre=form.cleaned_data['nombre'],
+                nombre=nuevo_nombre,
                 ciudad=form.cleaned_data['ciudad'],
                 tipo=form.cleaned_data['tipo'],
                 descripcion=form.cleaned_data['descripcion'],
                 imagen=form.cleaned_data['imagen']
             )
 
-            nuevo_nombre = form.cleaned_data['nombre']
+            if lugar_nombre != nuevo_nombre:
+
+                Resena.objects.using('mongodb').filter(lugar_nombre=lugar_nombre).update(lugar_nombre=nuevo_nombre)
+
+                Favorito.objects.using('mongodb').filter(lugar_nombre=lugar_nombre).update(lugar_nombre=nuevo_nombre)
+
+                rutas = Itinerario.objects.using('mongodb').filter(paradas=lugar_nombre)
+                for ruta in rutas:
+                    ruta.paradas = [nuevo_nombre if p == lugar_nombre else p for p in ruta.paradas]
+                    ruta.save(using='mongodb')
+
             messages.success(request, f'¡El lugar "{nuevo_nombre}" ha sido actualizado con éxito!')
             return redirect('gestionar_lugares')
     else:
