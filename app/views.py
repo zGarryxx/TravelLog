@@ -1,5 +1,4 @@
 from bson import ObjectId
-from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -15,6 +14,7 @@ import json
 import csv
 import io
 
+Usuario = get_user_model()
 
 # 1. Página de inicio
 def inicio(request):
@@ -31,7 +31,7 @@ def registrar_usuario(request):
         if form.is_valid():
             email = form.cleaned_data.get('email')
 
-            if User.objects.filter(email=email).exists():
+            if Usuario.objects.filter(email=email).exists():
                 messages.error(request, 'Este correo electrónico ya está registrado. Intenta iniciar sesión.')
                 return render(request, 'register.html', {'form': form})
 
@@ -48,6 +48,7 @@ def registrar_usuario(request):
             messages.error(request, 'Revisa los errores en el formulario.')
     else:
         form = RegistroForm()
+
     return render(request, 'register.html', {'form': form})
 
 # 3. Login
